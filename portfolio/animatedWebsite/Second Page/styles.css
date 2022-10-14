@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.body1 {
+    background-image: url("./images/pokemon-world-red-blue.webp");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.container {
+  align-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+a {
+  text-align: center;
+  align-items: center;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #590061;
+  
+}
+
+.todoDiv {
+  background: #ec008c;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #fc6767, #ec008c);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #fc6767, #ec008c); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+.body2 {
+  background-image: url("http://getwallpapers.com/wallpaper/full/4/1/1/53850.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}

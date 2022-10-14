@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Student Class Certificate Generator</title>
+        <link rel='stylesheet' href='style.css'>
+    </head>
+    <body>
+        <div class='student-wrapper'>
+            <div class='title'>Certificate Generator</div>
+            <div class='cell'>
+                <input 
+                    type='text' 
+                    id='studentName'
+                    placeholder='Student Name'
+                    required
+                    minlength='10'
+                />
+            </div>
+            <div class='cell'>
+                <input 
+                    type='text'
+                    id='className'
+                    placeholder='Name of Class'
+                    required
+                    minlength='7'
+                />
+            </div>
+            <div class='cell'>
+                <input 
+                    type='text'
+                    id='studentScores'
+                    placeholder='Enter all Student Scores'
+                    required
+                    minlength='1'
+                />
+            </div>
+            <div class='cell'>
+                <input 
+                    type='text'
+                    id='possibleScores'
+                    placeholder='Enter all Possible Scores'
+                    required
+                    minlength='1'
+                />
+            </div>
+            <div class='cell'>
+                <button id='reset'>Reset</button>
+                <button id='print'>Print Certificate</button>
+            </div>
+        </div>
+
+        <div class='certificate-background'>
+            <div  style='position:relative; top:50px;'>
+                <div class='cert-title'>Certificate of Completion</div>
+                <div class='cert-sub-title'>this certifies that</div>
+                <div id='certStudentName' class='cert-data'>&nbsp;</div>
+                <div class='cert-sub-title'>has successfully completed</div>
+                <div id='certClassName' class='cert-data'>&nbsp;</div>
+                <div class='cert-sub-title'>with a grade of</div>
+                <div id='certGrade' class='cert-data'>&nbsp;</div>
+            </div>
+        </div>
+        <a href="/portfolio/index.html">BACK TO PORTFOLIO</a>
+    </body>
+    <script src='./jscript.js'></script>
+    <script src='./student.js'></script>
+</html>

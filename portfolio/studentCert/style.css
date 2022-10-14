@@ -1,0 +1,68 @@
+.student-wrapper {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto;
+  border: 1px solid black;
+  border-radius: 4px;
+  width: 300px;
+  background-image: linear-gradient(
+    rgb(228, 228, 228),
+    white,
+    white,
+    white,
+    rgb(228, 228, 228)
+  );
+}
+.cell {
+  padding: 10px;
+  width: 100%;
+}
+.title {
+  text-align: center;
+  font-size: large;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.cert-title {
+  text-align: center;
+  font-size: 36px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  padding: 6px;
+}
+.cert-sub-title {
+  text-align: center;
+  font-size: 24px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  padding: 3px;
+}
+.cert-data {
+  text-align: center;
+  font-size: 24px;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  padding: 3px;
+}
+input {
+  width: 270px;
+  background-color: white;
+  border-color: silver;
+}
+button {
+  width: 137px;
+  background-color: gray;
+  color: white;
+}
+.certificate-background {
+  background-image: url(./images/cert.jpg);
+  background-size: 800x 400px;
+  width: 600px;
+  height: 464px;
+  margin: 0 auto;
+  position: relative;
+  top: 25px;
+}
+
+a{
+  align-self: center;
+  font-size: xx-large;
+  background-color: aqua;
+  color: black;
+}
