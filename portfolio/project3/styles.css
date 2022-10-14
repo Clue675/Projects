@@ -1,0 +1,82 @@
+* {
+    box-sizing: border-box;
+    padding: 2px;
+    align-items: center;
+    scroll-behavior: smooth;
+    scrollbar-color: to left, #b29f94, #603813;
+}
+
+
+.nav_bar {
+    box-sizing: border-box solid black;
+    text-align: center;
+    text-size-adjust: 40px;
+    align-content: center;
+    box-shadow: inset;
+}
+
+.home {
+    padding: 2px;
+}
+.home:hover {
+    padding: 5px;
+    background: #603813;
+    background: -webkit-linear-gradient(to left, #b29f94, #603813);  
+    background: linear-gradient(to left, #b29f94, #603813); 
+    animation: glow 1.5s linear infinite;
+    
+}
+
+.specials {
+    padding: 2px;
+}
+
+.specials:hover {
+    padding: 5px;
+    background: transparent #603813;
+    background: -webkit-linear-gradient(to left, #b29f94, #603813);  
+    background: linear-gradient(to left, #b29f94, #7a491b85); 
+    animation: glow 1.5s linear infinite;
+    
+}
+
+.contacts {
+    padding: 2px;
+    box-sizing: content-box;
+}
+
+.contacts:hover {
+    padding: 5px;
+    box-sizing: content-box;
+    background: #603813;
+    background: -webkit-linear-gradient(to left, #b29f94, #603813);  
+    background: linear-gradient(to left, #b29f94, #7a491b85);
+    animation: glow 1.5s linear infinite;
+    
+}
+footer {
+    margin-top: 50px;
+    padding: 2px;
+}
+img {
+    width: 100px;
+    height: 100px;
+    display: block;
+}
+
+/* Lets make some magic! */
+@keyframes glow {
+    0% {
+        filter: hue-rotate(0deg);
+      }
+      100% {
+        filter: hue-rotate(360deg);
+      }
+}
+
+a{
+    background-color: #603813;
+    font-size: xx-large;
+    font-weight: bold;
+    color: black;
+}
