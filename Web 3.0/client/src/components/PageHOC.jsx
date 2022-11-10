@@ -26,7 +26,8 @@ const PageHOC = (Component, title, description) => () => {
           <Component />
         </div>
 
-        <p className={styles.footerText}>Something here</p>
+        <p className={styles.footerText}>Enter the battleground and test your might!</p>
+        <a className={styles.footerText}  href='https://portfolio2022-sigma.vercel.app/'>Click here to return to Portfolio</a>
       </div>
 
       <div className="flex flex-1">
