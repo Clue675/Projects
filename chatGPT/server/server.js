@@ -8,7 +8,7 @@ dotenv.config();
 // console.log(process.env.OPENAI_API_KEY);
 
 const Configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY
 });
 
 const openai = new OpenAIApi(Configuration);
@@ -43,7 +43,7 @@ app.post('/', async (req, res) => {
         });
 
         res.status(200).send({
-            bot: response.data.choicess[0].text
+            bot: response.data.choices[0].text
         })
     } catch (error) {
         console.log(error);
