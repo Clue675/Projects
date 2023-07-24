@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import CustomButton from './CustomButton';
 import { useGlobalContext } from '../context';
 import { player01, player02 } from '../assets';
@@ -9,6 +8,15 @@ import styles from '../styles';
 const GameLoad = () => {
   const { walletAddress } = useGlobalContext();
   const navigate = useNavigate();
+
+  const renderPlayer = (image, playerName) => {
+    return (
+      <div className={`${styles.flexCenter} flex-col`}>
+        <img src={image} className={styles.gameLoadPlayerImg} alt={playerName} />
+        <p className={styles.gameLoadPlayerText}>{playerName}</p>
+      </div>
+    );
+  };
 
   return (
     <div className={`${styles.flexBetween} ${styles.gameLoadContainer}`}>
@@ -29,19 +37,9 @@ const GameLoad = () => {
         </p>
 
         <div className={styles.gameLoadPlayersBox}>
-          <div className={`${styles.flexCenter} flex-col`}>
-            <img src={player01} className={styles.gameLoadPlayerImg} />
-            <p className={styles.gameLoadPlayerText}>
-              {walletAddress.slice(0, 30)}
-            </p>
-          </div>
-
+          {renderPlayer(player01, walletAddress.slice(0, 30))}
           <h2 className={styles.gameLoadVS}>Vs</h2>
-
-          <div className={`${styles.flexCenter} flex-col`}>
-            <img src={player02} className={styles.gameLoadPlayerImg} />
-            <p className={styles.gameLoadPlayerText}>??????????</p>
-          </div>
+          {renderPlayer(player02, '??????????')}
         </div>
 
         <div className="mt-10">

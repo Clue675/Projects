@@ -5,16 +5,21 @@ import { useGlobalContext } from '../context';
 import { logo, heroImg } from '../assets';
 import styles from '../styles';
 
-const PageHOC = (Component, title, description) => () => {
+const PageHOC = (Component, title, description) => {
   const { showAlert } = useGlobalContext();
   const navigate = useNavigate();
 
-  return (
+  return () => (
     <div className={styles.hocContainer}>
       {showAlert?.status && <Alert type={showAlert.type} message={showAlert.message} />}
 
       <div className={styles.hocContentBox}>
-        <img src={logo} alt="logo" className={styles.hocLogo} onClick={() => navigate('/')} />
+        <img
+          src={logo}
+          alt="logo"
+          className={styles.hocLogo}
+          onClick={() => navigate('/')}
+        />
 
         <div className={styles.hocBodyWrapper}>
           <div className="flex flex-row w-full">
@@ -27,7 +32,9 @@ const PageHOC = (Component, title, description) => () => {
         </div>
 
         <p className={styles.footerText}>Enter the battleground and test your might!</p>
-        <a className={styles.footerText}  href='https://portfolio2022-sigma.vercel.app/'>Click here to return to Portfolio</a>
+        <a className={styles.footerText} href="https://portfolio2022-sigma.vercel.app/">
+          Click here to return to Portfolio
+        </a>
       </div>
 
       <div className="flex flex-1">

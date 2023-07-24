@@ -13,7 +13,7 @@ const Home = () => {
       const playerExists = await contract.isPlayer(walletAddress);
 
       if (!playerExists) {
-        await contract.registerPlayer(playerName, playerName, { gasLimit: 500000 }); //We are passing in the player name here
+        await contract.registerPlayer(playerName, playerName, { gasLimit: 500000 });
 
         setShowAlert({
           status: true,
@@ -37,13 +37,13 @@ const Home = () => {
     };
 
     if (contract) createPlayerToken();
-  }, [contract]);
+  }, [contract, navigate, walletAddress]);
 
   useEffect(() => {
     if (gameData.activeBattle) {
       navigate(`/battle/${gameData.activeBattle.name}`);
     }
-  }, [gameData]);
+  }, [gameData, navigate]);
 
   return (
     walletAddress && (
@@ -71,7 +71,6 @@ export default PageHOC(
     Welcome to Avax Gods <br /> a Web3 NFT Card Game
   </>,
   <>
-    Connect your wallet to start playing <br /> the ultimate Web3 Battle Card
-    Game
+    Connect your wallet to start playing <br /> the ultimate Web3 Battle Card Game
   </>,
 );
