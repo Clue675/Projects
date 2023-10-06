@@ -1,0 +1,16 @@
+.see-info {
+  position: relative;
+}
+.see-info-parent {
+  border-radius: 16px;
+  background-color: #0d8a7c;
+  display: flex;
+  flex-direction: row;
+  padding: var(--padding-mini) 22px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 17px;
+  color: var(--button);
+  font-family: var(--font-poppins);
+}

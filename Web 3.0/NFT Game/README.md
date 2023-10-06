@@ -11,3 +11,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
+
+
+//idle alter skin increase else egg oyster asthma pudding quality picture squeeze walnut surprise picnic toy language gun bunker travel wrist friend feed flame

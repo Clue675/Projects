@@ -1,0 +1,53 @@
+.side-panel {
+  width: 10px; /* Initial slim width */
+  height: 100%;
+  background-color: #111;
+  overflow-x: hidden;
+  position: fixed;
+  transition: width 0.5s, background-color 0.5s;
+  padding-top: 60px;
+  cursor: pointer;
+  border-right: 2px solid #818181; /* Thick edge */
+}
+
+.side-panel:hover {
+  width: 250px;
+}
+
+.side-panel a {
+  padding: 10px 15px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: opacity 0.5s;
+  transition-delay: 0.2s; /* Added delay */
+}
+
+.side-panel a:hover {
+  color: #822ee2;
+}
+
+.side-panel a, .side-panel i {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.side-panel:hover a, .side-panel:hover i {
+  opacity: 1;
+}
+
+@media screen and (max-width: 768px) {
+  .side-panel {
+    width: 0;
+  }
+  .side-panel a {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .side-panel:hover {
+    width: 200px;
+  }
+}

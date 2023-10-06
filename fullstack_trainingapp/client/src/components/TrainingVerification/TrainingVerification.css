@@ -1,0 +1,112 @@
+/* TrainingVerification.css */
+
+.training-verification-container {
+  width: 100%;
+  margin: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background-color: #f2f2f2;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+button {
+  margin: 0 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* Additional styling for selected rows */
+.selected-row {
+  background-color: rgb(56, 59, 61);
+}
+
+
+/* Custom Checkbox */
+[type="checkbox"] {
+  position: relative;
+  cursor: pointer;
+}
+
+[type="checkbox"]:before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #000;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+}
+
+[type="checkbox"]:checked:before {
+  background-color: #bbcea1;
+  border: 2px solid #007bff;
+}
+
+[type="checkbox"]:checked:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+  table,
+  th,
+  td {
+    display: block;
+  }
+
+  th,
+  td {
+    margin-bottom: 0.625rem;
+  }
+
+  th {
+    background: none;
+    padding-left: 0;
+  }
+}

@@ -1,0 +1,24 @@
+.account-purchase1 {
+  position: relative;
+}
+.vuesaxbulkflash-icon1 {
+  position: relative;
+  width: 27.19px;
+  height: 27.19px;
+}
+.account-purchase-group {
+  border-radius: var(--br-sm-6);
+  background: linear-gradient(93.58deg, #363e52, #2b3242);
+  box-shadow: 8.74046516418457px 9.711627960205078px 18.45px
+    rgba(61, 73, 100, 0.3) inset;
+  display: flex;
+  flex-direction: row;
+  padding: 19.423255920410156px 17.48093032836914px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 19.42px;
+  text-align: left;
+  font-size: 15.54px;
+  color: var(--button);
+  font-family: var(--font-inter);
+}

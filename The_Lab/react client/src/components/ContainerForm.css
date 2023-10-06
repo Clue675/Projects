@@ -1,0 +1,143 @@
+.vuesaxlinearprofile-2user-icon1 {
+  position: relative;
+  width: 19.78px;
+  height: 19.78px;
+}
+.vuesaxlinearprofile-2user-wrapper {
+  position: absolute;
+  top: 0;
+  left: 12.36px;
+  border-radius: var(--br-42xl-8);
+  background-color: var(--icon-circle);
+  display: flex;
+  flex-direction: row;
+  padding: 8.652177810668945px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.all-followers,
+.p {
+  margin: 0;
+  font-weight: 300;
+}
+.p {
+  font-size: 29.66px;
+  font-weight: 600;
+  color: var(--button);
+}
+.all-followers-1000-container {
+  position: relative;
+}
+.all-followers-1000-wrapper {
+  position: absolute;
+  top: 54.39px;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.frame-child3 {
+  position: relative;
+  width: 35.67px;
+  height: 17.31px;
+}
+.div {
+  position: relative;
+  font-weight: 600;
+}
+.group-parent4 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18.54px;
+}
+.this-month {
+  position: relative;
+  font-weight: 300;
+}
+.frame-parent10,
+.this-month-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-size: 12.36px;
+  color: var(--color-silver);
+}
+.frame-parent10 {
+  position: absolute;
+  top: 0;
+  left: 110.01px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8.65px;
+  font-size: 19.78px;
+  color: var(--button);
+}
+.frame-parent9 {
+  position: absolute;
+  top: 24.72px;
+  left: 24.72px;
+  width: 207.36px;
+  height: 126.39px;
+}
+.group-parent3 {
+  position: relative;
+  border-radius: 24.72px;
+  background: linear-gradient(119.15deg, #2e374b, #292f3c);
+  box-shadow: 9.711627960205078px 11.653953552246094px 77.69px
+    rgba(84, 135, 183, 0.08);
+  width: 269.9px;
+  height: 176.75px;
+}
+.total-earning-125k-wrapper {
+  top: 79.11px;
+  left: 24.72px;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.frame-parent12,
+.total-earning-125k-wrapper,
+.vuesaxlineardollar-circle-wrapper {
+  position: absolute;
+  display: flex;
+  justify-content: flex-start;
+}
+.frame-parent12 {
+  top: 24.72px;
+  left: 134.73px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8.65px;
+  font-size: 19.78px;
+  color: var(--button);
+}
+.vuesaxlineardollar-circle-wrapper {
+  top: 21.01px;
+  left: 20.57px;
+  border-radius: var(--br-42xl-8);
+  background-color: var(--icon-circle);
+  flex-direction: row;
+  padding: 7.416152000427246px;
+  align-items: flex-start;
+}
+.frame-parent13 {
+  position: absolute;
+  top: 24.72px;
+  left: 24.72px;
+  width: 220.36px;
+  height: 126.39px;
+}
+.frame-parent8 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 103.91px;
+  text-align: left;
+  font-size: 14.83px;
+  color: var(--color-silver);
+  font-family: var(--font-poppins);
+}

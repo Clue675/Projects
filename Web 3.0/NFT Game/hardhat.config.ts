@@ -22,7 +22,7 @@ export default {
       },
     },
   },
-   networks: {
+  networks: {
     fuji: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
       gasPrice: 225000000000,

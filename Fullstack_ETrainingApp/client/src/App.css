@@ -1,0 +1,24 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  margin-left: 10px; /* or 250px if you want it to match the expanded side panel */
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+/* If you want the header to adjust when the side panel is hovered */
+.side-panel:hover ~ .App-header {
+  margin-left: 250px;
+}

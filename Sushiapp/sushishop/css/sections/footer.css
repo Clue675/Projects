@@ -1,0 +1,72 @@
+/* Footer Styles */
+
+/* Main footer container */
+.footer {
+  width: 100%;  /* Full width */
+  padding: 20px 40px;  /* Padding around the footer */
+  background: var(--color-white);  /* Background color */
+
+  flex-wrap: wrap;  /* Allow items to wrap onto next line */
+  gap: 20px;  /* Gap between items */
+
+  overflow: hidden;  /* Hide overflow */
+}
+
+/* Footer logo styles */
+.footer__logo {
+  font-size: 24px;  /* Font size */
+  font-weight: bold;  /* Font weight */
+  font-family: var(--playfair-display);  /* Font family */
+  text-transform: uppercase;  /* Uppercase text */
+  color: var(--secondary-color);  /* Text color */
+
+  cursor: pointer;  /* Cursor changes to hand icon on hover */
+}
+
+/* Specific color for span inside footer logo */
+.footer__logo span {
+  color: var(--primary-color);  /* Text color */
+}
+
+/* Unordered list styles within the footer */
+.footer ul {
+  list-style: none;  /* Remove default list styles */
+
+  display: flex;  /* Flexbox layout */
+  flex-wrap: wrap;  /* Allow items to wrap onto next line */
+  flex-direction: row;  /* Horizontal layout */
+  gap: 64px;  /* Gap between items */
+}
+
+/* Adjust gap for the last unordered list */
+.footer ul:last-child {
+  gap: 32px;  /* Gap between items */
+}
+
+/* Navigation item styles within the footer */
+.footer__nav li {
+  font-size: 16px;  /* Font size */
+  font-weight: 500;  /* Font weight */
+  font-family: var(--plus-jakarta-sans);  /* Font family */
+  text-transform: uppercase;  /* Uppercase text */
+  color: var(--secondary-color);  /* Text color */
+
+  cursor: pointer;  /* Cursor changes to hand icon on hover */
+}
+
+/* Footer social icons container */
+.footer__social li {
+  width: 42px;  /* Width */
+  height: 42px;  /* Height */
+
+  background-color: var(--secondary-color);  /* Background color */
+  border-radius: 100%;  /* Rounded corners */
+}
+
+/* Footer social icons image */
+.footer__social li img {
+  width: 45%;  /* Width */
+  height: 45%;  /* Height */
+
+  object-fit: contain;  /* Keep aspect ratio */
+}

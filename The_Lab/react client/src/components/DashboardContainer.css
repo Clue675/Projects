@@ -1,0 +1,39 @@
+.dashboard1 {
+  position: relative;
+}
+.dashboard-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.see-your-account {
+  position: relative;
+  font-weight: 300;
+}
+.see-your-account-information-i-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-size: 17.48px;
+}
+.frame-parent5,
+.frame-parent6 {
+  display: flex;
+  justify-content: flex-start;
+}
+.frame-parent6 {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-sm-6);
+}
+.frame-parent5 {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 96.47px;
+  text-align: left;
+  font-size: 29.13px;
+  color: var(--button);
+  font-family: var(--font-raleway);
+}

@@ -1,0 +1,11 @@
+.vuesaxlineardollar-circle-icon {
+  position: relative;
+  width: 21.37px;
+  height: 21.37px;
+}
+.vuesaxlineardollar-circle {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}

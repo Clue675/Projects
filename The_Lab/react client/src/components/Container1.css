@@ -1,0 +1,14 @@
+.vuesaxlineardiagram-icon {
+  position: relative;
+  width: 22.16px;
+  height: 22.16px;
+}
+.vuesaxlineardiagram {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}

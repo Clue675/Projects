@@ -1,0 +1,11 @@
+.vuesaxlinearsms-icon {
+  position: relative;
+  width: 26.14px;
+  height: 26.14px;
+}
+.vuesaxlinearsms {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}

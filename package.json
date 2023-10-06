@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "bash": "^0.0.1",
-    "dotenv": "^16.0.3"
-  }
-}

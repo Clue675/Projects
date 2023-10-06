@@ -1,0 +1,288 @@
+
+/* Reseting */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+  }
+  
+  body {
+    background-image: url('https://www.callcentrehelper.com/images/stories/2020/06/software-background-760.png');
+    background-repeat: no-repeat;
+    background-size: cover; /* Make the image cover the entire element */
+    background-position: center; /* Center the background image */
+    background-attachment: fixed; /* Optional: Make the background fixed */
+  }
+  
+  
+  .wrapper {
+    max-width: 350px;
+    min-height: 500px;
+    margin: 80px auto;
+    padding: 40px 30px 30px 30px;
+    background: #9689e2;
+    border-radius: 15px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1), -2px -2px 8px rgba(255, 255, 255, 0.9);
+  }
+  
+  
+  /* Error Message */
+  .error-message {
+    color: #7069b6; /* Changed to a softer red */
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+  
+  /* Success Message */
+  .success-message {
+    color: #2ecc71; /* Changed to a softer green */
+    margin-top: 10px;
+    font-size: 1rem;
+  }
+  
+  
+  .wrapper {
+      max-width: 350px;
+      min-height: 500px;
+      margin: 80px auto;
+      padding: 40px 30px 30px 30px;
+      background: linear-gradient(135deg, #7a87cf 0%, #1e212d 100%);
+      border-radius: 15px;
+      box-shadow: 13px 13px 20px #1e212d, -13px -13px 20px #2a2f4a;
+  }
+  
+  .logo {
+      width: 80px;
+      margin: auto;
+  }
+  
+  .logo img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 50%;
+      animation: glowing 1.5s infinite alternate;
+      box-shadow: 0px 0px 3px #5f5f5f,
+                  0px 0px 0px 5px #ecf0f3,
+                  8px 8px 15px #a7aaa7,
+                  -8px -8px 15px #fff;
+  }
+  
+  @keyframes glowing {
+    0% {
+      box-shadow: 0px 0px 5px #5f5f5f,
+                  0px 0px 5px #ecf0f3,
+                  8px 8px 15px #a7aaa7,
+                  -8px -8px 15px #fff;
+    }
+    100% {
+      box-shadow: 0px 0px 20px #5f5f5f,
+                  0px 0px 20px #ecf0f3,
+                  8px 8px 30px #a7aaa7,
+                  -8px -8px 30px #fff;
+    }
+  }
+  
+  .wrapper .name {
+      font-weight: 600;
+      font-size: 1.4rem;
+      letter-spacing: 1.3px;
+      padding-left: 10px;
+      color: #131111;
+  }
+  
+  .wrapper .form-field input {
+      width: 100%;
+      display: block;
+      border: none;
+      outline: none;
+      background: none;
+      font-size: 1.2rem;
+      color: #f5f5f5;
+      padding: 10px 15px 10px 10px;
+  }
+  
+  .wrapper .form-field {
+      padding-left: 10px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      box-shadow: inset 8px 8px 8px #1e212d, inset -8px -8px 8px #2a2f4a;
+  }
+  
+  .wrapper .btn {
+      box-shadow: none;
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(135deg, #448aff 0%, #f8fafd 100%);
+      color: #fff;
+      border-radius: 25px;
+      box-shadow: 3px 3px 3px #1e212d,
+                  -3px -3px 3px #2a2f4a;
+      letter-spacing: 1.3px;
+  }
+  
+  .wrapper .btn:hover {
+      background: linear-gradient(115deg, #448aff 0%, #2962ff 100%);
+  }
+  
+  .action-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .action-text {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #f5f5f5;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-button {
+    background: linear-gradient(135deg, #448aff 0%, #2962ff 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+  }
+  
+  .action-button:hover {
+    background: linear-gradient(115deg, #448aff 0%, #2962ff 100%);
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+  
+  .success-message {
+    color: green;
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+  
+  
+  .drawerLink {
+    color: #555 !important;
+    font-size: 20px;
+    text-decoration: none !important;
+  }
+  
+  .drawerIcon {
+    color: #9dccf0 !important;
+  }
+  
+  /* ... Existing styles ... */
+  
+  /* Chrome Autofill styles */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important;
+  }
+  
+  /* ... */
+  
+  
+  /* Mobile view */
+  @media (max-width: 768px) {
+    .wrapper {
+      margin: 30px auto;
+      padding: 20px 15px 15px 15px;
+    }
+  
+    .logo {
+      width: 60px;
+    }
+  
+    .logo img {
+      height: 60px;
+    }
+  
+    .wrapper .name {
+      font-size: 1.2rem;
+    }
+  
+    .wrapper .form-field input {
+      font-size: 1rem;
+      padding: 8px 12px 8px 8px;
+    }
+  
+    .wrapper .btn {
+      height: 35px;
+    }
+  
+    .action-container {
+      margin-top: 10px;
+    }
+  
+    .action-text {
+      font-size: 0.8rem;
+    }
+  
+    .action-button {
+      padding: 8px 16px;
+    }
+  
+    .error-message,
+    .success-message {
+      font-size: 0.7rem;
+    }
+  }
+  
+  /* Tablet view */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .wrapper {
+      margin: 50px auto;
+      padding: 30px 25px 25px 25px;
+    }
+  
+    .logo {
+      width: 70px;
+    }
+  
+    .logo img {
+      height: 70px;
+    }
+  
+    .wrapper .name {
+      font-size: 1.3rem;
+    }
+  
+    .wrapper .form-field input {
+      font-size: 1.1rem;
+      padding: 9px 14px 9px 9px;
+    }
+  
+    .wrapper .btn {
+      height: 38px;
+    }
+  
+    .action-container {
+      margin-top: 15px;
+    }
+  
+    .action-text {
+      font-size: 0.85rem;
+    }
+  
+    .action-button {
+      padding: 9px 18px;
+    }
+  
+    .error-message,
+    .success-message {
+      font-size: 0.75rem;
+    }
+  }
+  
