@@ -46,13 +46,19 @@ function DrawerComponent() {
           <ListItem onClick={() => setOpenDrawer(false)}>
             <ListItemIcon><HomeIcon className="iconStyle" /></ListItemIcon>
             <ListItemText>
-              <Link to="/" className="drawerLink">Dashboard</Link>
+              <Link to="/dashboard" className="drawerLink">Dashboard</Link>
             </ListItemText>
           </ListItem>
           <ListItem onClick={() => setOpenDrawer(false)}>
             <ListItemIcon><FaSearch className="iconStyle" /></ListItemIcon>
             <ListItemText>
-              <Link to="/home-page" className="drawerLink">Search Training Records</Link>
+              <Link to="/search" className="drawerLink">Search Training Records</Link>
+            </ListItemText>
+          </ListItem>
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><FaSearch className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/CertificateGenerator" className="drawerLink">Certificate Generator</Link>
             </ListItemText>
           </ListItem>
           <ListItem onClick={() => setOpenDrawer(false)}>

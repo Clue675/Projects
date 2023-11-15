@@ -1,22 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@material-ui/core";
-import { Link } from "react-router-dom";
-import DrawerComponent from "./Drawer";
-import axios from "axios";
-import { AuthContext } from "../Auth/AuthContext";
-import "./Navbar.css";
 
-function Navbar() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+import React, { useState, useContext, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@material-ui/core";
+import HomeIcon from "@material-ui/icons/Home";
+import AddBoxIcon from "@material-ui/icons/AddBox";
+import LoginIcon from "@material-ui/icons/ExitToApp";
+import LogoutIcon from "@material-ui/icons/PowerSettingsNew";
+import MenuIcon from "@material-ui/icons/Menu";
+import { AuthContext } from "../Auth/AuthContext";
+import axios from "axios";
+import './Navbar.css'; // Assuming the styles are in Navbar.css
+import { FaSearch } from "react-icons/fa";
+
+function DrawerComponent() {
+  const [openDrawer, setOpenDrawer] = useState(false);
   const { isLoggedIn, token } = useContext(AuthContext);
-  const [first_name, setFirstName] = useState("");
+  
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -26,57 +31,71 @@ function Navbar() {
       axios
         .get("http://localhost:5000/getUsername", config)
         .then((response) => {
-          console.log("User Data:", response.data); // Check the response
-          // Use the correct field name from the server's response
-          setFirstName(response.data.first_name); // Setting first_name here
+          // Debugging: Log the user data received from the server
+          console.log("User Data:", response.data);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
         });
     }
   }, [isLoggedIn, token]);
-  
-  
-  
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h4" className="logo">
-          Employee Training Database
-        </Typography>
-        <div className="username-display">
-          {first_name ? `Welcome, ${first_name}` : ""}
-        </div>
-
-        {isMobile ? (
-          <DrawerComponent />
-        ) : (
-          <div className="navlinks">
-            <Link to="/" className="link">
-              Home
-            </Link>
-            <Link to="/smart-form" className="link">
-              Submit Training Form
-            </Link>
-            <Link to="/search" className="link">
-              Search Training Database
-            </Link>
-            {!isLoggedIn && (
-              <Link to="/login" className="link">
-                Login
-              </Link>
-            )}
-            {isLoggedIn && (
-              <Link to="/logout" className="link">
-                Logout
-              </Link>
-            )}
-          </div>
-        )}
-      </Toolbar>
-    </AppBar>
+    <>
+      <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)}>
+        <List className="drawerList">
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><HomeIcon className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/dashboard" className="drawerLink">Dashboard</Link>
+            </ListItemText>
+          </ListItem>
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><FaSearch className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/search" className="drawerLink">Search Training Records</Link>
+            </ListItemText>
+          </ListItem>
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><FaSearch className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/CertificateGenerator" className="drawerLink">Certificate Generator</Link>
+            </ListItemText>
+          </ListItem>
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><AddBoxIcon className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/smart-form" className="drawerLink">Add Training Data</Link>
+            </ListItemText>
+          </ListItem>
+          <ListItem onClick={() => setOpenDrawer(false)}>
+            <ListItemIcon><AddBoxIcon className="iconStyle" /></ListItemIcon>
+            <ListItemText>
+              <Link to="/training-verification" className="drawerLink">Training Verification</Link>
+            </ListItemText>
+          </ListItem>
+          {!isLoggedIn && (
+            <ListItem onClick={() => setOpenDrawer(false)}>
+              <ListItemIcon><LoginIcon className="iconStyle" /></ListItemIcon>
+              <ListItemText>
+                <Link to="/login" className="drawerLink">Login</Link>
+              </ListItemText>
+            </ListItem>
+          )}
+          {isLoggedIn && (
+            <ListItem onClick={() => setOpenDrawer(false)}>
+              <ListItemIcon><LogoutIcon className="iconStyle" /></ListItemIcon>
+              <ListItemText>
+                <Link to="/logout" className="drawerLink">Logout</Link>
+              </ListItemText>
+            </ListItem>
+          )}
+        </List>
+      </Drawer>
+      <MenuIcon className="drawerIcon" onClick={() => setOpenDrawer(!openDrawer)} />
+    </>
   );
 }
 
-export default Navbar;
+export default DrawerComponent;
+

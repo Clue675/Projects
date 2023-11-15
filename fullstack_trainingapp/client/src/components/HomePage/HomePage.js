@@ -1,83 +1,60 @@
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
-import { AuthContext } from "../Auth/AuthContext";
-import "./HomePage.css";
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import axios from 'axios';
 
-const HomePage = () => {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const { token } = useContext(AuthContext);
+// Updated VISIBLE_FIELDS to match the server's response keys
+const VISIBLE_FIELDS = ['id', 'First Name', 'Last Name', 'Badge Number', 'Training Title', 'Trainer', 'Date'];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
-        if (query) {
-          const response = await axios.get(`http://localhost:5000/search?query=${query}`, config);
-          const updatedResults = response.data.data.map((result) => {
-            return {
-              ...result,
-              "Work Center": "PLACEHOLDER"  // Adding a placeholder for the work center
-            };
-          });
-          setResults(updatedResults);
+export default function QuickFilteringGrid() {
+  const [data, setData] = React.useState({ rows: [], columns: [] });
+  const [query, setQuery] = React.useState('');
+
+  const fetchData = () => {
+    console.log(`Fetching data for query: ${query}`);
+    axios.get(`http://localhost:5000/search?query=${query}`)
+      .then((response) => {
+        const rows = response.data.map((row, index) => ({ id: index, ...row }));
+        console.log(`Received data: ${JSON.stringify(rows)}`);
+        if (!rows.length) {
+          console.log('Received empty or unexpected data');
+          return;
         }
-      } catch (err) {
-        console.error("An error occurred:", err);
-      }
-    };
-
-    fetchData();
-  }, [query, token]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+        const columns = Object.keys(rows[0]).map((key) => ({
+          field: key,
+          headerName: key,  // Assuming the keys from the server are already in the format you want to display
+          width: 150,
+        }));
+        setData({ rows, columns });
+      });
   };
 
-  return (
-    <div className="container">
-      <form onSubmit={handleSubmit}>
-        <input
-          className="search-input"
-          type="text"
-          placeholder="Search for training..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button className="search-button" type="submit">
-          Search
-        </button>
-      </form>
-      <table className="responsive-table">
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Badge Number</th>
-            <th>Training Title</th>
-            <th>Trainer</th>
-            <th>Date</th>
-            <th>Work Center</th>
-          </tr>
-        </thead>
-        <tbody>
-          {results.map((result, index) => (
-            <tr key={index}>
-              <td>{result['First Name']}</td>
-              <td>{result['Last Name']}</td>
-              <td>{result['Badge Number']}</td>
-              <td>{result['Training Title']}</td>
-              <td>{result.Trainer}</td>
-              <td>{result.Date}</td>
-              <td>{result['Work Center']}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+  React.useEffect(() => {
+    fetchData();
+  }, [query]);
 
-export default HomePage;
+  const columns = React.useMemo(
+    () => data.columns.filter((column) => VISIBLE_FIELDS.includes(column.field)),
+    [data.columns],
+  );
+
+  return (
+    <Box sx={{ height: 400, width: 1 }}>
+      <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <button onClick={fetchData}>Submit</button>
+      <DataGrid
+        rows={data.rows}
+        columns={columns}
+        disableColumnFilter
+        disableColumnSelector
+        disableDensitySelector
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+      />
+    </Box>
+  );
+}

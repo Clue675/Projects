@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
 
 .navbar {
-  background-color: #2c3e50;
+  
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,12 +18,12 @@
 }
 
 .navbar {
-  background-color: #007bff !important;  /* Bootstrap primary blue */
-  border-bottom: 4px solid #0056b3;  /* Darker blue for contrast */
+    /* Bootstrap primary blue */
+  border-bottom: 4px solid #8b939b;  /* Darker blue for contrast */
 }
 
 .navbar a {
-  color: #ffffff !important;  /* White text for better contrast */
+  color: #080808 !important;  /* White text for better contrast */
 }
 
 .navbar a:hover, .link:hover {
@@ -37,12 +37,12 @@
   padding: 5px 10px;
   border-radius: 12px;
   cursor: pointer;  /* Add cursor pointer to indicate interactivity */
-  color: #f5e23a;  /* Set text color to white */
+  color: #b6e66a;  /* Set text color to white */
   margin-left: 1rem; /* Add some spacing from the logo */
 }
 
 .username-display:hover {
-  border-color: #ffffff;  /* Set border color to white on hover */
+  border-color: #1dd81d;  /* Set border color to white on hover */
 }
 
 
@@ -50,11 +50,11 @@
 .drawerLink {
   text-decoration: none;
   font-size: 20px;
-  color: #ffffff;  /* White text for better contrast */
+  color: #2b2828;  /* White text for better contrast */
 }
 
 .drawerIcon {
-  color: #ffffff;  /* White color for icons */
+  color: #111010;  /* White color for icons */
 }
 
 .navlinks {
@@ -70,7 +70,7 @@
 
 .link {
   text-decoration: none;
-  color: rgb(243, 238, 238);
+  color: rgb(22, 19, 19);
   font-size: 1.25rem;
   margin-left: 2rem;
   padding: 8px 16px;
@@ -108,4 +108,8 @@
     margin-right: 0;
     text-align: center;
   }
+}
+
+.navbar {
+  background: linear-gradient(90deg, rgba(28, 28, 28, 1) 0%, rgba(44, 44, 44, 1) 50%, rgba(28, 28, 28, 1) 100%);
 }

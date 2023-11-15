@@ -19,7 +19,6 @@ const SmartForm = () => {
   const [showToast, setShowToast] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isFullScreen, setIsFullScreen] = useState(false); // Track full-screen mode
 
   const toggleLock = () => {
     setLocked(!locked);
@@ -30,36 +29,7 @@ const SmartForm = () => {
     setTrainee({ ...trainee, [name]: value });
   };
 
-  const enterFullScreen = () => {
-    const element = document.documentElement;
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    }
-  };
 
-  const exitFullScreen = () => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  };
-
-  const handleFullScreenToggle = () => {
-    if (isFullScreen) {
-      exitFullScreen();
-    } else {
-      enterFullScreen();
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,26 +75,7 @@ const SmartForm = () => {
     }
   };
 
-  // Event listener to track full-screen change
-  useEffect(() => {
-    const handleFullScreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullScreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullScreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullScreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullScreenChange);
-
-    return () => {
-      // Clean up event listeners
-      document.removeEventListener("fullscreenchange", handleFullScreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullScreenChange);
-      document.removeEventListener("mozfullscreenchange", handleFullScreenChange);
-      document.removeEventListener("MSFullscreenChange", handleFullScreenChange);
-    };
-  }, []);
-
+  
   useEffect(() => {
     const fetchTrainerName = async () => {
       try {
@@ -150,12 +101,7 @@ const SmartForm = () => {
   }, [isLoggedIn, token]);
 
   return (
-    <div className={`smart-form-container ${isFullScreen ? "full-screen" : ""}`}>
-      <div className="fullscreen-button">
-        <Button variant="primary" onClick={handleFullScreenToggle}>
-          Toggle Fullscreen
-        </Button>
-      </div>
+    <div className={`smart-form-container `}>
       <h1>
         {locked ? trainee.title : <input type="text" value={trainee.title} onChange={handleChange} name="title" />}
       </h1>

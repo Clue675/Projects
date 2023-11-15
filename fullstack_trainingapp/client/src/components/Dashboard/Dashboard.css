@@ -1,125 +1,22 @@
-/* Dashboard container */
+
 .dashboard-container {
-  position: relative;
-  overflow: hidden;
+  background-color: #9bb6f1;  /* Background color */
   padding: 20px;
+  border-radius: 8px;
 }
 
-/* Dashboard header */
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 2rem;
-  color: #333;
+.chart-container {
+  margin: 20px;
+  padding: 20px;
+  background-color: #ffefef;  /* Background color for each chart container */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Dashboard content */
-.dashboard-content {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-/* Left column */
-.dashboard-left {
-  flex: 1;
-  padding-right: 20px;
-}
-
-/* Chart container */
-.dashboard-left .chart-container {
-  height: 400px;
-  margin-bottom: 20px;
-}
-
-/* Right column */
-.dashboard-right {
-  flex: 1;
-  padding-left: 20px;
-}
-
-/* User list table */
-.user-list {
-  margin-top: 20px;
-}
-
-.user-list h2 {
-  font-size: 1.5rem;
-  color: #444;
-  margin-bottom: 15px;
-}
-
-.user-list table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.user-list th,
-.user-list td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
-
-.user-list th {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.user-list tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.user-list tr:hover {
-  background-color: #ddd;
-}
-
-/* Responsive layout */
-@media only screen and (max-width: 768px) {
-  .dashboard-content {
-    flex-direction: column;
-  }
-
-  .dashboard-left,
-  .dashboard-right {
-    padding: 0;
-    margin-bottom: 20px;
-  }
-
-  .user-list table,
-  .user-list thead,
-  .user-list tbody,
-  .user-list th,
-  .user-list td,
-  .user-list tr {
-    display: block;
-  }
-
-  .user-list thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-
-  .user-list tr {
-    margin: 0 0 1rem 0;
-  }
-
-  .user-list td {
-    border: none;
-    border-bottom: 1px solid #ccc;
-    position: relative;
-    padding-left: 50%;
-  }
-
-  .user-list td:before {
-    content: attr(data-label);
-    position: absolute;
-    top: 0;
-    left: 6px;
-    width: 45%;
-    padding: 12px;
-    white-space: nowrap;
-    background-color: #f2f2f2;
+/* Responsiveness for smaller screens */
+@media (max-width: 768px) {
+  .chart-container {
+    margin: 10px;
+    padding: 10px;
   }
 }

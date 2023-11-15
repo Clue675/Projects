@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import ReactTooltip from "react-tooltip";
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import ReactTooltip from 'react-tooltip';
 
-import { AppWrap, MotionWrap } from "../../wrapper";
-import { urlFor, client } from "../../client";
-import "./Skills.scss";
+import { AppWrap, MotionWrap } from '../../wrapper';
+import { urlFor, client } from '../../client';
+import './Skills.scss';
 
 const Skills = () => {
   const [experiences, setExperiences] = useState([]);
@@ -15,7 +15,8 @@ const Skills = () => {
     const skillsQuery = '*[_type == "skills"]';
 
     client.fetch(query).then((data) => {
-      setExperiences(data);
+      const sortedData = data.sort((a, b) => a.year - b.year);
+      setExperiences(sortedData);
     });
 
     client.fetch(skillsQuery).then((data) => {
@@ -40,9 +41,9 @@ const Skills = () => {
                 className="app__flex"
                 style={{
                   backgroundColor: skill.bgColor,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
               >
                 <img src={urlFor(skill.icon)} alt={skill.name} />
@@ -92,7 +93,7 @@ const Skills = () => {
 };
 
 export default AppWrap(
-  MotionWrap(Skills, "app__skills"),
-  "skills",
-  "app__whitebg"
+  MotionWrap(Skills, 'app__skills'),
+  'skills',
+  'app__whitebg'
 );
