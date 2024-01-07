@@ -1,6 +1,4 @@
-import psycopg2
-from app.utils.postgres import create_server_connection
-
+from ..utils.db_connection import create_server_connection
 
 class PurchasingOrder:
     def __init__(self, order_id, vendor_id, part_number, part_name, revision, material, workorder_number, quantity, status, promised_date, delivered_date=None):
@@ -22,10 +20,9 @@ class PurchasingOrder:
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    INSERT INTO purchasing_orders (order_id, vendor_id, part_number, part_name, revision, material, workorder_number, quantity, status, promised_date, delivered_date)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO purchasing_orders (vendor_id, part_number, part_name, revision, material, workorder_number, quantity, status, promised_date, delivered_date)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
-                    order_details['order_id'],
                     order_details['vendor_id'],
                     order_details['part_number'],
                     order_details['part_name'],
@@ -35,9 +32,13 @@ class PurchasingOrder:
                     order_details['quantity'],
                     order_details['status'],
                     order_details['promised_date'],
-                    order_details.get('delivered_date', None)
+                    order_details.get('delivered_date')
                 ))
             connection.commit()
+
+
+    # Add more methods as needed for handling orders
+
 
     @staticmethod
     def get_all_orders():

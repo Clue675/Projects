@@ -1,92 +1,65 @@
+# app/api/discrepancy_api.py
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS
 import psycopg2
 import os
+import logging
+
 from app.models.discrepancy_report import DiscrepancyReport
+from app.models.nonconforming_notification import NonconformingNotification  # Import the NonconformingNotification model
 
+# Set up basic configuration for logging
+logging.basicConfig(level=logging.INFO)
 
+# Blueprint for discrepancy report functionalities
 discrepancy_blueprint = Blueprint('discrepancy', __name__)
+CORS(discrepancy_blueprint)
 
 def get_db_connection():
     return psycopg2.connect(os.getenv('DATABASE_URL'))
 
-@discrepancy_blueprint.route('/reports', methods=['POST'])
-def create_report():
+@discrepancy_blueprint.route('/discrepancy/reports', methods=['GET'])
+def get_reports():
+    try:
+        logging.info("Fetching all discrepancy reports")
+        reports = DiscrepancyReport.get_all_reports()
+        return jsonify(reports), 200
+    except Exception as e:
+        logging.error("Error fetching discrepancy reports: %s", e, exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+@discrepancy_blueprint.route('/discrepancy/notifications/create', methods=['POST'])
+def create_notification():
     data = request.get_json()
-    required_fields = ['order_id', 'issue_details', 'severity', 'affected_parts', 'recommended_action']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'Missing field: {field}'}), 400
+    report_id = data.get('report_id')
+    action = data.get('action')
+
+    if not report_id or not action:
+        return jsonify({'error': 'Report ID and action are required'}), 400
 
     try:
-        conn = get_db_connection()
-        report_id = DiscrepancyReport.create_new_report_from_inspection_record(data, conn)
-        
-        if report_id is None:
-            return jsonify({'error': 'Order ID not found or insufficient data for report creation'}), 404
-
-        return jsonify({'message': 'Discrepancy report created successfully!', 'report_id': report_id}), 201
+        notification_id = NonconformingNotification.create_notification(report_id, action)
+        return jsonify({'message': 'Notification created successfully', 'notification_id': notification_id}), 201
     except Exception as e:
+        logging.error("Error creating notification: %s", e, exc_info=True)
         return jsonify({'error': str(e)}), 500
-    finally:
-        if conn:
-            conn.close()
 
-@discrepancy_blueprint.route('/reports/<report_id>', methods=['GET'])
-def get_report(report_id):
-    """
-    Retrieve a specific discrepancy report by its ID.
-    """
+@discrepancy_blueprint.route('/discrepancy/notifications/submit/<int:notification_id>', methods=['POST'])
+def submit_notification(notification_id):
     try:
-        conn = get_db_connection()
-        report = DiscrepancyReport.get_report_by_id(report_id, conn)
-        
-        if not report:
-            return jsonify({'error': 'Report not found'}), 404
-
-        return jsonify(report), 200
+        NonconformingNotification.submit_notification(notification_id)
+        return jsonify({'message': 'Notification submitted successfully'}), 200
     except Exception as e:
+        logging.error("Error submitting notification: %s", e, exc_info=True)
         return jsonify({'error': str(e)}), 500
-    finally:
-        if conn:
-            conn.close()
 
-@discrepancy_blueprint.route('/reports/<report_id>', methods=['PUT'])
-def update_report(report_id):
-    """
-    Update an existing discrepancy report.
-    """
-    data = request.get_json()
+@discrepancy_blueprint.route('/discrepancy/notifications', methods=['GET'])
+def get_notifications():
     try:
-        conn = get_db_connection()
-        success = DiscrepancyReport.update_report(report_id, data, conn)
-        
-        if not success:
-            return jsonify({'error': 'Report not found or update failed'}), 404
-
-        return jsonify({'message': 'Discrepancy report updated successfully!'}), 200
+        notifications = NonconformingNotification.get_all_notifications()
+        return jsonify(notifications), 200
     except Exception as e:
+        logging.error("Error retrieving notifications: %s", e, exc_info=True)
         return jsonify({'error': str(e)}), 500
-    finally:
-        if conn:
-            conn.close()
+# You can add more routes and methods as needed
 
-@discrepancy_blueprint.route('/reports/<report_id>', methods=['DELETE'])
-def delete_report(report_id):
-    """
-    Delete a discrepancy report.
-    """
-    try:
-        conn = get_db_connection()
-        success = DiscrepancyReport.delete_report(report_id, conn)
-        
-        if not success:
-            return jsonify({'error': 'Report not found or deletion failed'}), 404
-
-        return jsonify({'message': 'Discrepancy report deleted successfully!'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if conn:
-            conn.close()
-
-# Additional routes and functionalities can be added here as needed

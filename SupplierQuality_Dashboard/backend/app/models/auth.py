@@ -1,11 +1,10 @@
+# models/user.py
+from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash
-import psycopg2
-from dotenv import load_dotenv
+# Import the database connection utility
+from app.utils.db_connection import create_server_connection
 
-# Load environment variables
-load_dotenv()
 
-# User class to represent user records
 class User:
     def __init__(self, id, email, password_hash, first_name=None, last_name=None, department=None, phone_number=None, alt_phone_number=None):
         self.id = id
@@ -17,39 +16,33 @@ class User:
         self.phone_number = phone_number
         self.alt_phone_number = alt_phone_number
 
-# Function to create a new user
-def create_user(email, password, first_name=None, last_name=None, department=None, phone_number=None, alt_phone_number=None):
-    hashed_password = generate_password_hash(password)  # Use default hash method
-    connection = psycopg2.connect(os.getenv('DATABASE_URL'))
-    with connection:
-        with connection.cursor() as cursor:
+    @classmethod
+    def get_user_by_email(cls, email):
+        conn = create_server_connection()
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                "SELECT id, email, password AS password_hash, first_name, last_name, department, phone_number, alt_phone_number FROM users WHERE email = %s", (email,))
+            user_data = cursor.fetchone()
+            conn.close()
+            return cls(**user_data) if user_data else None
+
+    @classmethod
+    def create(cls, email, password, first_name=None, last_name=None, department=None, phone_number=None, alt_phone_number=None):
+        hashed_password = generate_password_hash(password)
+        conn = create_server_connection()
+        with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO users (email, password, first_name, last_name, department, phone_number, alt_phone_number) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (email, hashed_password, first_name, last_name, department, phone_number, alt_phone_number))
-            connection.commit()
+            conn.commit()
+            conn.close()
 
-# Function to check if email already exists in the database
-def email_exists(email):
-    connection = psycopg2.connect(os.getenv('DATABASE_URL'))
-    with connection:
-        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-            return bool(cursor.fetchone())
-
-# Login function
-def login_user(email, password):
-    user = get_user_by_email(email)
-    if user and check_password_hash(user.password_hash, password):
-        return True  # Login successful
-    return False  # Login failed, incorrect email or password
-
-# Registration function
-def register_user(email, password, first_name=None, last_name=None, department=None, phone_number=None, alt_phone_number=None):
-    if email_exists(email):
-        return False  # Email already exists, return error or appropriate response
-
-    create_user(email, password, first_name, last_name, department, phone_number, alt_phone_number)
-    return True  # Registration successful
-
-# Other necessary functions...
+    @classmethod
+    def email_exists(cls, email):
+        conn = create_server_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+            exists = bool(cursor.fetchone())
+            conn.close()
+            return exists

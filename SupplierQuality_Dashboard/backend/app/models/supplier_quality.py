@@ -1,39 +1,34 @@
-import psycopg2
-from database import create_server_connection
 from datetime import datetime
+import os
+import psycopg2
+from app.utils.performance_utils import categorize_performance
 
-def categorize_performance(score):
-    if score >= 98.0:
-        return 'Excellent', 'Green'
-    elif 95.0 <= score < 98.0:
-        return 'Satisfactory', 'Yellow'
-    else:
-        return 'Unacceptable', 'Red'
 
-def add_supplier_quality_record(record_data):
-    """Add a new supplier quality record to the database."""
+def create_server_connection():
+    return psycopg2.connect(os.getenv('DATABASE_URL'))
+
+def add_supplier_quality_record(data):
     connection = create_server_connection()
-    with connection:
+    try:
         with connection.cursor() as cursor:
-            # Calculate overall score and categorize performance
-            overall_score = (record_data['quality_score'] + record_data.get('delivery_score', 100)) / 2
-            quality_category, quality_color = categorize_performance(record_data['quality_score'])
-            delivery_category, delivery_color = categorize_performance(record_data.get('delivery_score', 100))
+            overall_score = (data['quality_score'] + data.get('delivery_score', 100)) / 2
+            quality_category, quality_color = categorize_performance(data['quality_score'])
+            delivery_category, delivery_color = categorize_performance(data.get('delivery_score', 100))
             overall_category, overall_color = categorize_performance(overall_score)
 
-            # Insert data into the supplier_quality_records table
             cursor.execute("""
                 INSERT INTO supplier_quality_records 
                 (vendor_id, quality_score, delivery_score, overall_score, 
                  quality_category, delivery_category, overall_category, 
                  quality_color, delivery_color, overall_color, 
-                 record_date, notes, recorded_by, created_at, otd_status, actual_delivery_date, po_due_date)
+                 record_date, notes, recorded_by, created_at, otd_status, 
+                 actual_delivery_date, po_due_date)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id;
             """, (
-                record_data['vendor_id'],
-                record_data['quality_score'],
-                record_data.get('delivery_score', 100),  # Default to 100 if not provided
+                data['vendor_id'],
+                data['quality_score'],
+                data.get('delivery_score', 100),
                 overall_score,
                 quality_category,
                 delivery_category,
@@ -41,26 +36,57 @@ def add_supplier_quality_record(record_data):
                 quality_color,
                 delivery_color,
                 overall_color,
-                record_data['record_date'],
-                record_data['notes'],
-                record_data['recorded_by'],
-                record_data['created_at'],
-                record_data['otd_status'],
-                record_data['actual_delivery_date'],
-                record_data['po_due_date']
+                data['record_date'],
+                data.get('notes', ''),
+                data.get('recorded_by', ''),
+                datetime.now(),
+                data.get('otd_status', ''),
+                data.get('actual_delivery_date', None),
+                data.get('po_due_date', None)
             ))
-            new_id = cursor.fetchone()[0]
+            record_id = cursor.fetchone()[0]
             connection.commit()
-            return new_id
+            return record_id
+    finally:
+        connection.close()
 
-def get_supplier_quality_records(vendor_id):
-    """Retrieve all quality records for a specific vendor."""
+
+def get_supplier_quality_records(vendor_id, filter_type, filter_value, page, per_page):
     connection = create_server_connection()
-    records = []
-    with connection:
+    try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM supplier_quality_records WHERE vendor_id = %s;", (vendor_id,))
-            records = cursor.fetchall()
-    return records
+            base_query = "SELECT * FROM supplier_quality_records"
+            params = []
 
-# Additional functions can be defined here for updating, deleting, or querying specific records
+            if vendor_id is not None:
+                base_query += " WHERE vendor_id = %s"
+                params.append(vendor_id)
+
+            if filter_type == 'month':
+                base_query += " AND EXTRACT(MONTH FROM record_date) = EXTRACT(MONTH FROM DATE %s)"
+                params.append(filter_value)
+            elif filter_type == 'quarter':
+                base_query += " AND EXTRACT(QUARTER FROM record_date) = EXTRACT(QUARTER FROM DATE %s)"
+                params.append(filter_value)
+            elif filter_type == 'year':
+                base_query += " AND EXTRACT(YEAR FROM record_date) = EXTRACT(YEAR FROM DATE %s)"
+                params.append(filter_value)
+
+            offset = (page - 1) * per_page
+            pagination_query = " LIMIT %s OFFSET %s"
+            params.extend([per_page, offset])
+
+            cursor.execute(base_query + pagination_query, tuple(params))
+            records = cursor.fetchall()
+
+            total_query = "SELECT COUNT(*) FROM supplier_quality_records"
+            if vendor_id is not None:
+                total_query += " WHERE vendor_id = %s"
+                cursor.execute(total_query, (vendor_id,))
+            else:
+                cursor.execute(total_query)
+            total_records = cursor.fetchone()[0]
+
+            return records, total_records
+    finally:
+        connection.close()

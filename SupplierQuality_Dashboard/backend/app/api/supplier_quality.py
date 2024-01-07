@@ -1,51 +1,28 @@
+import logging
 from flask import Blueprint, request, jsonify
-import psycopg2
-import psycopg2.extras
-import os
-from datetime import datetime
+from flask_cors import CORS
+from app.utils.db_connection import create_server_connection
 
 supplier_quality_blueprint = Blueprint('supplier_quality', __name__)
+CORS(supplier_quality_blueprint)
 
-def get_db_connection():
-    return psycopg2.connect(os.getenv('DATABASE_URL'))
 
-@supplier_quality_blueprint.route('/records', methods=['POST'])
-def create_quality_record():
-    data = request.get_json()
-
-    # Input Validation Logic
-    if 'vendor_id' not in data or not isinstance(data['vendor_id'], int):
-        return jsonify({'error': 'Vendor ID is required and must be an integer.'}), 400
-    if 'quality_score' not in data or not isinstance(data['quality_score'], (int, float)) or not 0 <= data['quality_score'] <= 100:
-        return jsonify({'error': 'Quality score must be a percentage between 0 and 100.'}), 400
-    if 'record_date' in data:  # Optional: Validate record_date if provided
-        try:
-            record_date = datetime.strptime(data['record_date'], '%Y-%m-%d')
-        except ValueError:
-            return jsonify({'error': 'Invalid record date. Use YYYY-MM-DD format.'}), 400
-    else:
-        record_date = datetime.utcnow()
-
-    # Additional validations as needed...
+# Set up basic configuration for logging
+logging.basicConfig(level=logging.INFO)
+                    
+                    
+@supplier_quality_blueprint.route('/records', methods=['GET'])
+def add_supplier_quality_record(data):
+    connection = create_server_connection()
+    # Retrieve query parameters for filtering and pagination
+    filter_type = request.args.get('filter_type', 'all')
+    filter_value = request.args.get('filter_value')
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
 
     try:
-        # Establish database connection
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            # Insert supplier quality record
-            cur.execute("""
-                INSERT INTO supplier_quality_records (vendor_id, quality_score, record_date, notes)
-                VALUES (%s, %s, %s, %s) RETURNING id;
-            """, (data['vendor_id'], data['quality_score'], record_date, data.get('notes', '')))
-            record_id = cur.fetchone()[0]
-            conn.commit()
-
-        return jsonify({'message': 'Quality record created successfully!', 'id': record_id}), 201
-
+        # Assuming get_supplier_quality_records can handle a None value for vendor_id
+        records, total_records = get_supplier_quality_records(None, filter_type, filter_value, page, per_page)
+        return jsonify({'records': records, 'total_records': total_records, 'page': page, 'per_page': per_page}), 200
     except Exception as e:
-        conn.rollback()
         return jsonify({'error': str(e)}), 500
-    finally:
-        conn.close()
-
-# Add other routes and functionalities as needed

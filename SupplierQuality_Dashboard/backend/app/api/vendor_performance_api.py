@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
-from models.vendor_performance import VendorPerformance
+from flask_cors import CORS
+from ..models.vendor_performance import VendorPerformance
 import psycopg2
 import os
 
 vendor_performance_blueprint = Blueprint('vendor_performance', __name__)
+CORS(vendor_performance_blueprint)
 
 @vendor_performance_blueprint.route('/performance', methods=['POST'])
 def update_performance():
