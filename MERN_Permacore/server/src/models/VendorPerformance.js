@@ -2,8 +2,11 @@ const mongoose = require('mongoose');
 
 const vendorPerformanceSchema = new mongoose.Schema({
     vendorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor',
+        type: Number, 
+        required: true
+    },
+    vendorName: {
+        type: String,
         required: true
     },
     evaluationDate: {
@@ -43,6 +46,8 @@ const vendorPerformanceSchema = new mongoose.Schema({
     }
 });
 
+
+
 vendorPerformanceSchema.pre('save', function(next) {
     this.qualityRating = (this.quantityAccepted / this.quantityReceived) * 100;
     this.deliveryRating = (this.poReceivedOnTime / this.poReceived) * 100;
@@ -63,5 +68,9 @@ function categorizePerformance(rating) {
         return 'Unacceptable';
     }
 }
+
+vendorPerformanceSchema.set('toJSON', {
+    virtuals: true
+});
 
 module.exports = mongoose.model('VendorPerformance', vendorPerformanceSchema);

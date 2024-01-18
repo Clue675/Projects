@@ -1,18 +1,29 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
 
 /**
- * Generates a PDF document with the given content.
- * @param {string} filename - The filename to save the PDF as.
- * @param {string} content - The content to include in the PDF.
+ * Generates a PDF document from the given content and returns it as a binary buffer.
+ * @param {string} content - The text content to be included in the PDF.
+ * @returns {Promise<Buffer>} - A promise that resolves with the PDF data as a binary buffer.
  */
-const generatePDF = (filename, content) => {
+const generatePDF = (content) => {
     return new Promise((resolve, reject) => {
-        // Create a document
+        // Create a new PDF document
         const doc = new PDFDocument();
+        let buffers = [];
 
-        // Pipe the PDF into a writable stream (e.g., a file)
-        doc.pipe(fs.createWriteStream(filename));
+        // Collect data chunks as they are generated
+        doc.on('data', (chunk) => buffers.push(chunk));
+
+        // Once PDF generation is complete, concatenate all chunks to form the final binary data
+        doc.on('end', () => {
+            let pdfData = Buffer.concat(buffers);
+            resolve(pdfData);
+        });
+
+        // Handle any errors during PDF generation
+        doc.on('error', (err) => {
+            reject(err);
+        });
 
         // Add content to the document
         doc.fontSize(12).text(content, {
@@ -20,18 +31,8 @@ const generatePDF = (filename, content) => {
             width: 410
         });
 
-        // Finalize the PDF and end the stream
+        // Finalize the PDF, indicating we're finished writing to it
         doc.end();
-
-        // Resolve the promise once the stream has finished
-        doc.on('finish', () => {
-            resolve(`PDF saved as ${filename}`);
-        });
-
-        // Reject the promise on error
-        doc.on('error', (err) => {
-            reject(err);
-        });
     });
 };
 

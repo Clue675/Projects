@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Adjust the path as per your project structure
+const User = require('../models/User'); 
 
 const authMiddleware = {
     // Middleware to authenticate and set user in the request

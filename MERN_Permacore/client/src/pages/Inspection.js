@@ -1,160 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import {
-  Container, Typography, Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Grid, Select, MenuItem
-} from '@mui/material';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import EditIcon from '@mui/icons-material/Edit';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
+import { CssBaseline, Drawer as MuiDrawer, Box, AppBar as MuiAppBar, Toolbar, List, Typography, Divider, IconButton, Badge } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
-const InspectionPage = () => {
-  const [inspections, setInspections] = useState([]);
-  const [rejectionCodes, setRejectionCodes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [discrepancyDialogOpen, setDiscrepancyDialogOpen] = useState(false);
-  const [discrepancyReport, setDiscrepancyReport] = useState({});
-  const [selectedInspection, setSelectedInspection] = useState(null);
+// Import Components
+import InspectionComponent from '../components/Inspection/Inspection';
+import InspectionBacklogComponent from '../components/Inspection/InspectionBacklog';
 
-  useEffect(() => {
-    fetchInspections();
-    fetchRejectionCodes();
-  }, []);
+const drawerWidth = 240;
 
-  const fetchInspections = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('/api/inspections/');
-      setInspections(response.data);
-    } catch (error) {
-      console.error('Error fetching inspections:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+// AppBar styling
+const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
 
-  const fetchRejectionCodes = async () => {
-    try {
-      const response = await axios.get('/api/rejectionCodes');
-      setRejectionCodes(response.data);
-    } catch (error) {
-      console.error('Error fetching rejection codes:', error);
-    }
-  };
-
-  const handleDiscrepancyReportChange = (e) => {
-    setDiscrepancyReport({ ...discrepancyReport, [e.target.name]: e.target.value });
-  };
-
-  const submitDiscrepancyReport = async () => {
-    try {
-      await axios.post('/api/discrepancyReports', discrepancyReport);
-      alert('Discrepancy report submitted successfully.');
-    } catch (error) {
-      console.error('Error submitting discrepancy report:', error);
-    }
-    setDiscrepancyDialogOpen(false);
-  };
-
-  const handleRejectionCodeChange = async (inspectionId, newValue) => {
-    try {
-      await axios.put(`/api/inspections/${inspectionId}`, { rejectionCode: newValue });
-      fetchInspections();
-    } catch (error) {
-      console.error('Error updating inspection:', error);
-    }
-  };
-
-  const columns = [
-    { field: 'inspectorName', headerName: 'Inspector Name', width: 150 },
-    { field: 'inspectionDate', headerName: 'Inspection Date', width: 130, type: 'date' },
-    { field: 'quantityReceived', headerName: 'Quantity Received', width: 130, type: 'number' },
-    { field: 'quantityAccepted', headerName: 'Quantity Accepted', width: 130, type: 'number' },
-    { field: 'quantityRejected', headerName: 'Quantity Rejected', width: 130, type: 'number' },
-    {
-      field: 'rejectionCode',
-      headerName: 'Rejection Code',
-      width: 130,
-      renderCell: (params) => (
-        <Select
-          value={params.value || ''}
-          onChange={(e) => handleRejectionCodeChange(params.id, e.target.value)}
-          style={{ width: '100%' }}
-        >
-          {rejectionCodes.map((code) => (
-            <MenuItem key={code._id} value={code._id}>{code.description}</MenuItem>
-          ))}
-        </Select>
-      ),
+// Drawer styling
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+  ({ theme, open }) => ({
+    '& .MuiDrawer-paper': {
+      position: 'relative',
+      whiteSpace: 'nowrap',
+      width: drawerWidth,
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      boxSizing: 'border-box',
+      ...(!open && {
+        overflowX: 'hidden',
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+        width: theme.spacing(7),
+        [theme.breakpoints.up('sm')]: {
+          width: theme.spacing(9),
+        },
+      }),
     },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <>
-          <IconButton onClick={() => setSelectedInspection(params.row)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => setDiscrepancyDialogOpen(true)}>
-            <ReportProblemIcon />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
+  }),
+);
+
+const defaultTheme = createTheme();
+
+export default function Dashboard() {
+  const [open, setOpen] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(4); // Example count for notifications
+
+  const toggleDrawer = () => {
+    setOpen(!open);
+  };
+
+  const clearNotifications = () => {
+    setNotificationCount(0); // Reset notification count
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Inspection Management
-      </Typography>
-
-      <div style={{ height: 400, width: '100%', marginTop: 20 }}>
-        <DataGrid
-          rows={inspections}
-          columns={columns}
-          pageSize={10}
-          loading={loading}
-          components={{ Toolbar: GridToolbar }}
-        />
-      </div>
-
-      <Dialog open={discrepancyDialogOpen} onClose={() => setDiscrepancyDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Create Discrepancy Report</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                autoFocus
-                margin="dense"
-                name="discrepancyDetails"
-                label="Discrepancy Details"
-                type="text"
-                fullWidth
-                variant="outlined"
-                onChange={handleDiscrepancyReportChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                margin="dense"
-                name="notes"
-                label="Notes"
-                type="text"
-                fullWidth
-                variant="outlined"
-                onChange={handleDiscrepancyReportChange}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDiscrepancyDialogOpen(false)}>Cancel</Button>
-          <Button onClick={submitDiscrepancyReport} variant="contained">Submit Report</Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+    <ThemeProvider theme={defaultTheme}>
+      <Router>
+        <Box sx={{ display: 'flex' }}>
+          <CssBaseline />
+          <AppBar position="absolute" open={open}>
+            <Toolbar sx={{ pr: '24px' }}>
+              <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={toggleDrawer} sx={{ marginRight: '36px', ...(open && { display: 'none' }), }}>
+                <MenuIcon />
+              </IconButton>
+              <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
+                Inspection Dashboard
+              </Typography>
+              <IconButton color="inherit" onClick={clearNotifications}>
+                <Badge badgeContent={notificationCount} color="secondary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+          <Drawer variant="permanent" open={open}>
+            <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: [1] }}>
+              <IconButton onClick={toggleDrawer}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </Toolbar>
+            <Divider />
+            <List component="nav">
+              <ListItem button component={Link} to="/inspection">
+                <ListItemIcon><VisibilityIcon /></ListItemIcon>
+                <ListItemText primary="Inspection" />
+              </ListItem>
+              <ListItem button component={Link} to="/inspection-backlog">
+                <ListItemIcon><LocalShippingIcon /></ListItemIcon>
+                <ListItemText primary="Inspection Backlog" />
+              </ListItem>
+              {/* Add more list items here for additional pages */}
+            </List>
+          </Drawer>
+          <Box component="main" sx={{ backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900], flexGrow: 1, height: '100vh', overflow: 'auto', }}>
+            <Toolbar />
+            <Routes>
+              <Route path="/inspection" element={<InspectionComponent />} />
+              <Route path="/inspection-backlog" element={<InspectionBacklogComponent />} />
+              {/* Define more routes as needed */}
+            </Routes>
+          </Box>
+        </Box>
+      </Router>
+    </ThemeProvider>
   );
-};
-
-export default InspectionPage;
+}

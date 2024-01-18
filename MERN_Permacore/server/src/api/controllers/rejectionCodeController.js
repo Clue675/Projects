@@ -1,5 +1,14 @@
 const RejectionCode = require('../../models/RejectionCode');
 
+const createMultipleRejectionCodes = async (req, res) => {
+    try {
+        const newCodes = await RejectionCode.insertMany(req.body);
+        res.status(201).json(newCodes);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 // Create a new rejection code
 const createRejectionCode = async (req, res) => {
     try {
@@ -61,6 +70,7 @@ const deleteRejectionCode = async (req, res) => {
 };
 
 module.exports = {
+    createMultipleRejectionCodes,
     createRejectionCode,
     getAllRejectionCodes,
     getRejectionCodeById,

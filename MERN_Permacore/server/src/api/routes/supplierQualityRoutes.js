@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const vendorPerformanceController = require('../controllers/vendorPerformanceController');
 
 // Import the supplier quality controller
 const supplierQualityController = require('../controllers/supplierQualityController');
 
 // GET all supplier quality records
 router.get('/', supplierQualityController.getAllSupplierQualityRecords);
+
+router.get('/:id', vendorPerformanceController.getVendorPerformanceByVendorId);
 
 // GET a single supplier quality record by id
 router.get('/:id', supplierQualityController.getSupplierQualityRecordById);

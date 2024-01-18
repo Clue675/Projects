@@ -5,7 +5,7 @@ const router = express.Router();
 const inspectionController = require('../controllers/inspectionController');
 
 // GET all inspections
-router.get('/', inspectionController.getAllInspections);
+router.get('/', inspectionController.getPendingInspections);
 
 // GET a single inspection by id
 router.get('/:id', inspectionController.getInspectionById);
@@ -18,5 +18,12 @@ router.put('/:id', inspectionController.updateInspection);
 
 // DELETE an inspection
 router.delete('/:id', inspectionController.deleteInspection);
+
+// Route to get pending inspections
+router.get('/pending', inspectionController.getPendingInspections);
+
+// Route to assign an inspection to an inspector
+router.post('/assign', inspectionController.assignInspection);
+
 
 module.exports = router;

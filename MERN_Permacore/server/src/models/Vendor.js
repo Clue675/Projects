@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
-// Define the schema for a vendor
 const vendorSchema = new mongoose.Schema({
-    // Vendor name
+    vendorId: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     vendorName: {
         type: String,
         required: true
     },
-
-    // Contact information
     contactInfo: {
         email: String,
         streetAddress: String,
@@ -20,28 +21,28 @@ const vendorSchema = new mongoose.Schema({
         qualityRepName: String,
         salesRepName: String
     },
-
     // Performance score and other quality-related metrics
-    performanceScore: Number,
-    qualityScore: Number,
-    deliveryScore: Number,
-
-    // Audit dates and status
+    performanceScore: {
+        type: Number,
+        default: 0 // Default value set to 0
+    },
+    qualityScore: {
+        type: Number,
+        default: 0 // Default value set to 0
+    },
+    deliveryScore: {
+        type: Number,
+        default: 0 // Default value set to 0
+    },
     lastAuditDate: Date,
     nextAuditDate: Date,
     status: {
         type: String,
-        enum: ['Active', 'Inactive', 'UnderReview'],
+        enum: ['Active', 'Inactive', 'Probation, Disqualified, On-Hold'],
         default: 'Active'
     },
-
-    // Risk assessment
-    riskCode: String,
-
-    // Comments or additional notes
+    riskCode: Number,
     comments: String,
-
-    // Timestamps for record creation and modification
     createdAt: {
         type: Date,
         default: Date.now
@@ -50,18 +51,23 @@ const vendorSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-
-    // References to certifications held by the vendor
     certifications: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Certification'
     }]
 });
 
-// Middleware for updatedAt field
+// Middleware for updatedAt field. Used this also in timestamp in mongodb collections.
 vendorSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
 });
 
-module.exports = mongoose.model('Vendor', vendorSchema);
+let Vendor;
+if (mongoose.models.Vendor) {
+    Vendor = mongoose.model('Vendor');
+} else {
+    Vendor = mongoose.model('Vendor', vendorSchema);
+}
+
+module.exports = Vendor;

@@ -3,6 +3,32 @@
 // Sample data model - replace with your actual Mongoose model for supplier quality records
 const SupplierQuality = require('../../models/SupplierQuality');
 
+// Function to calculate overall supplier quality rating
+const calculateOverallSupplierQualityRating = async () => {
+    try {
+        const records = await SupplierQuality.find();
+        let totalOTD = 0, totalQuality = 0, count = 0;
+
+        records.forEach(record => {
+            if(record.otdRating && record.qualityRating) {
+                totalOTD += record.otdRating;
+                totalQuality += record.qualityRating;
+                count++;
+            }
+        });
+
+        const averageOTD = totalOTD / count;
+        const averageQuality = totalQuality / count;
+        
+        // Assuming equal weight for OTD and Quality
+        const overallRating = (averageOTD + averageQuality) / 2;
+        return overallRating;
+    } catch (error) {
+        console.error('Error calculating overall supplier quality rating:', error);
+        return null;
+    }
+};
+
 const getAllSupplierQualityRecords = async (req, res) => {
     try {
         const records = await SupplierQuality.find();
@@ -63,6 +89,7 @@ module.exports = {
     getSupplierQualityRecordById,
     createSupplierQualityRecord,
     updateSupplierQualityRecord,
-    deleteSupplierQualityRecord
+    deleteSupplierQualityRecord,
+    calculateOverallSupplierQualityRating
 };
 

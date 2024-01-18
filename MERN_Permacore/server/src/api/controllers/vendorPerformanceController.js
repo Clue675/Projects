@@ -9,6 +9,9 @@ const addVendorPerformance = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
+    vendorPerformanceSchema.set('toJSON', {
+        virtuals: true
+    });
 };
 
 // Retrieve all vendor performance records
@@ -22,15 +25,17 @@ const getAllVendorPerformances = async (req, res) => {
 };
 
 // Retrieve a single vendor performance record by ID
-const getVendorPerformanceById = async (req, res) => {
+const getVendorPerformanceByVendorId = async (req, res) => {
     try {
-        const performance = await VendorPerformance.findById(req.params.id);
+        const vendorId = parseInt(req.params.vendorId); // Convert the vendorId parameter to a number
+
+        const performance = await VendorPerformance.findOne({ vendorId: vendorId });
         if (!performance) {
             return res.status(404).json({ message: 'Vendor performance record not found' });
         }
         res.status(200).json(performance);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(400).json({ message: error.message });
     }
 };
 
@@ -63,7 +68,7 @@ const deleteVendorPerformance = async (req, res) => {
 module.exports = {
     addVendorPerformance,
     getAllVendorPerformances,
-    getVendorPerformanceById,
+    getVendorPerformanceByVendorId,
     updateVendorPerformance,
     deleteVendorPerformance
 };

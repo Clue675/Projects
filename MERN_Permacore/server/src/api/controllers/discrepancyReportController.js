@@ -3,13 +3,21 @@ const DiscrepancyReport = require('../../models/DiscrepancyReport');
 // Create a new discrepancy report
 const createDiscrepancyReport = async (req, res) => {
     try {
-        const newReport = new DiscrepancyReport(req.body);
+        const discrepancyId = Math.floor(1000 + Math.random() * 9000); // Random ID between 1000 and 9999
+        const newReport = new DiscrepancyReport({
+            ...req.body,
+            discrepancyId
+        });
+
         await newReport.save();
         res.status(201).json(newReport);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
+
+// Remaining functions...
+
 
 // Retrieve all discrepancy reports
 const getAllDiscrepancyReports = async (req, res) => {

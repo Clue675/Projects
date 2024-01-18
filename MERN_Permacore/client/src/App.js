@@ -1,23 +1,26 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ShipmentPage from './pages/Shipping'; // Import the ShipmentPage component
-import LoginPage from './pages/Login'; // Import the LoginPage component
-import RegisterPage from './pages/Register'; // Import the RegisterPage component
-// Import other components if necessary
+import ShipmentPage from './pages/Shipping';
+import InspectionPage from './pages/Inspection';
+import SupplierQualityPage from './pages/SupplierQuality';
+import DashboardPage from './pages/Dashboard';
+import LoginPage from './pages/Login';
+import RegisterPage from './pages/Register';
+import SplashScreen from './pages/Home'; // Ensure this file exists
 
 const App = () => {
     return (
         <Router>
-            <div>
-                <Routes>
-                    <Route path="/login" element={<LoginPage />} /> 
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/shipments" element={<ShipmentPage />} /> 
-                    {/* Add more routes for other pages as needed */}
-                    {/* Redirect to login or another page as the default route */}
-                    <Route path="*" element={<LoginPage />} />
-                </Routes>
-            </div>
+            <Routes>
+                <Route path="/" element={<SplashScreen />} /> {/* Default route is now SplashScreen */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/shipments" element={<ShipmentPage />} />
+                <Route path="/inspection" element={<InspectionPage />} />
+                <Route path="/supplier-quality" element={<SupplierQualityPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                {/* Add more routes for other pages as needed */}
+            </Routes>
         </Router>
     );
 };

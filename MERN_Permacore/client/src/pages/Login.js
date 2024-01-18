@@ -1,22 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import axios from 'axios';
 import {
-    Avatar,
-    Button,
-    CssBaseline,
-    TextField,
-    FormControlLabel,
-    Checkbox,
-    Link,
-    Paper,
-    Box,
-    Grid,
-    Typography
+    Avatar, Button, CssBaseline, TextField, FormControlLabel,
+    Checkbox, Link, Paper, Box, Grid, Typography
 } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-import { loginUser } from '../utils/api';
+import { Link as RouterLink } from 'react-router-dom';
 
 const theme = createTheme();
 
@@ -31,30 +22,33 @@ export default function Login() {
             email: data.get('email'),
             password: data.get('password'),
         };
-
+    
         try {
-            const response = await loginUser(loginPayload);
-            if (response && response.token) {
-                localStorage.setItem('authToken', response.token);
+            const response = await axios.post('http://localhost:5000/api/users/login', loginPayload);
+            if (response.data && response.data.token) {
+                localStorage.setItem('authToken', response.data.token);
                 navigate('/dashboard'); // Redirect to dashboard upon successful login
             } else {
                 setErrorMessage('Login successful, but no authentication token received.');
             }
         } catch (error) {
             let errMsg = 'Login failed. Please try again.';
-            if (error.response && error.response.data) {
-                errMsg = `Error: ${error.response.data.message || 'Login failed'}`;
+            if (error.response && error.response.data && error.response.data.message) {
+                errMsg = `Error: ${error.response.data.message}`;
+            } else if (error.response && error.response.status === 404) {
+                errMsg = 'User not found. Please check your email.';
             } else {
                 errMsg = error.message || 'An error occurred during login';
             }
             setErrorMessage(errMsg);
         }
     };
+
     return (
         <ThemeProvider theme={theme}>
             <Grid container component="main" sx={{ height: '100vh' }}>
                 <CssBaseline />
-                <Grid item xs={false} sm={4} md={7} sx={{ backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)', backgroundRepeat: 'no-repeat', backgroundColor: t => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900], backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                <Grid item xs={false} sm={4} md={7} sx={{ backgroundImage: 'url(https://source.unsplash.com/random)', backgroundRepeat: 'no-repeat', backgroundColor: t => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900], backgroundSize: 'cover', backgroundPosition: 'center' }} />
                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
                     <Box sx={{ my: 8, mx: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
@@ -72,7 +66,9 @@ export default function Login() {
                                     <Link href="#" variant="body2">Forgot password?</Link>
                                 </Grid>
                                 <Grid item>
-                                    <Link href="/register" variant="body2">{"Don't have an account? Sign Up"}</Link>
+                                    <RouterLink to="/register" style={{ textDecoration: 'none' }}>
+                                        {"Don't have an account? Sign Up"}
+                                    </RouterLink>
                                 </Grid>
                             </Grid>
                         </Box>

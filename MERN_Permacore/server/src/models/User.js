@@ -1,51 +1,31 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const Schema = mongoose.Schema;
 
-// Define the schema for a user
-const userSchema = new mongoose.Schema({
-    // User's name
-    name: {
+const userSchema = new Schema({
+    firstName: {
         type: String,
-        required: true
+        required: true,
     },
-
-    // User's email, used for login
+    lastName: {
+        type: String,
+        required: true,
+    },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true, // Automatically convert email to lowercase
     },
-
-    // Password for authentication
     password: {
         type: String,
-        required: true
+        required: true,
     },
-
-    // Role of the user (e.g., inspector, supplier quality engineer)
     role: {
         type: String,
-        enum: ['Inspecton', 'SupplierQuality', 'Shipping',],
-        default: 'Shipping'
-    },
-
-    // Timestamps for record creation and modification
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
+        enum: ['Purchasing', 'Supplier Quality', 'Inspection', 'Shipping'],
+        required: true,
     }
-});
-
-// Pre-save middleware to hash the password
-userSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 8);
-    }
-    next();
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
+

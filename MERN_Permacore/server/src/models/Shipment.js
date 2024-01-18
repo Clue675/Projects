@@ -1,37 +1,52 @@
 const mongoose = require('mongoose');
 
-// Define the schema for a shipment
 const shipmentSchema = new mongoose.Schema({
-    // Unique identifier for the shipment
     shipmentId: {
         type: String,
         required: true,
         unique: true
     },
-
-    // Reference to the vendor associated with this shipment
     vendorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vendor',
+        type: Number, // Ensuring vendorId is a Number
         required: true
     },
-
-    // Purchase order number related to this shipment
-    purchaseOrderNumber: String,
-
-    // Expected and actual delivery dates
-    expectedDeliveryDate: Date,
-    dateReceived: Date,
-
-    // Details about the shipment contents
-    partNumber: String,
-    quantityShipped: Number,
-    unitCost: Number,
-
-    // Additional notes or comments
+    vendorName: {
+        type: String,
+        required: true
+    },
+    purchaseOrderNumber: {
+        type: Number,
+        required: true
+    },
+    partNumber: {
+        type: String,
+        required: true
+    },
+    workOrderNumber: {
+        type: Number, // Optional
+        required: false
+    },
+    reworkNumber: {
+        type: Number, // Optional
+        required: false
+    },
+    dateReceived: {
+        type: Date,
+        required: true
+    },
+    quantityShipped: {
+        type: Number,
+        required: true
+    },
+    unitCost: {
+        type: Number,
+        required: true
+    },
+    expectedDeliveryDate: {
+        type: Date,
+        required: true
+    },
     notes: String,
-
-    // Timestamps for record creation and modification
     createdAt: {
         type: Date,
         default: Date.now
@@ -40,12 +55,8 @@ const shipmentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-});
+}, { timestamps: true }); // Enable automatic handling of createdAt and updatedAt
 
-// Middleware for updatedAt field
-shipmentSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
-});
+const Shipment = mongoose.model('Shipment', shipmentSchema);
 
-module.exports = mongoose.model('Shipment', shipmentSchema);
+module.exports = Shipment;

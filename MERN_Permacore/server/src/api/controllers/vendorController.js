@@ -1,7 +1,19 @@
 const Vendor = require('../../models/Vendor');
+const Certification = require('../../models/Certification');
+const { generatePDF } = require('../../utils/pdfUtils');
+const fs = require('fs');
+const path = require('path');
+
+// Function to save PDF to file system and return the file path
+async function savePDFToFileSystem(pdfBuffer, vendorId) {
+    const filename = `certification-${vendorId}-${Date.now()}.pdf`;
+    const filepath = path.join(__dirname, '../uploads', filename);
+    fs.writeFileSync(filepath, pdfBuffer);
+    return filepath;
+}
 
 // Add a new vendor
-const addVendor = async (req, res) => {
+exports.addVendor = async (req, res) => {
     try {
         const newVendor = new Vendor(req.body);
         await newVendor.save();
@@ -12,9 +24,9 @@ const addVendor = async (req, res) => {
 };
 
 // Retrieve all vendors
-const getAllVendors = async (req, res) => {
+exports.getAllVendors = async (req, res) => {
     try {
-        const vendors = await Vendor.find();
+        const vendors = await Vendor.find().populate('certifications');
         res.status(200).json(vendors);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -22,9 +34,9 @@ const getAllVendors = async (req, res) => {
 };
 
 // Retrieve a single vendor by ID
-const getVendorById = async (req, res) => {
+exports.getVendorById = async (req, res) => {
     try {
-        const vendor = await Vendor.findById(req.params.id);
+        const vendor = await Vendor.findById(req.params.id).populate('certifications');
         if (!vendor) {
             return res.status(404).json({ message: 'Vendor not found' });
         }
@@ -35,7 +47,7 @@ const getVendorById = async (req, res) => {
 };
 
 // Update a vendor's details
-const updateVendor = async (req, res) => {
+exports.updateVendor = async (req, res) => {
     try {
         const updatedVendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedVendor) {
@@ -48,7 +60,7 @@ const updateVendor = async (req, res) => {
 };
 
 // Delete a vendor
-const deleteVendor = async (req, res) => {
+exports.deleteVendor = async (req, res) => {
     try {
         const deletedVendor = await Vendor.findByIdAndDelete(req.params.id);
         if (!deletedVendor) {
@@ -60,10 +72,24 @@ const deleteVendor = async (req, res) => {
     }
 };
 
-module.exports = {
-    addVendor,
-    getAllVendors,
-    getVendorById,
-    updateVendor,
-    deleteVendor
+// Add a new certification for a vendor
+exports.addCertification = async (req, res) => {
+    try {
+        const { vendorId, certificateText } = req.body;
+        const pdfBuffer = await generatePDF(certificateText);
+        const fileReference = await savePDFToFileSystem(pdfBuffer, vendorId);
+
+        const newCertification = new Certification({
+            ...req.body,
+            vendorId,
+            fileReference
+        });
+        await newCertification.save();
+
+        res.status(201).json(newCertification);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 };
+
+// Other certification-related functions can be added here as needed

@@ -24,18 +24,26 @@ const calculateQualityScore = async (vendorId) => {
  * Function to calculate delivery score based on shipment data.
  */
 const calculateDeliveryScore = async (vendorId) => {
-    const shipments = await Shipment.find({ vendorId });
+    // Convert vendorId to a number if it's not already
+    const numericVendorId = Number(vendorId);
+    if (isNaN(numericVendorId)) {
+        console.error(`Invalid vendorId (not a number): ${vendorId}`);
+        return 0; // Or handle this case as you see fit
+    }
+    
+    const shipments = await Shipment.find({ vendorId: numericVendorId });
     let onTimeDeliveries = 0;
 
     shipments.forEach(shipment => {
-        const deliveryTime = (shipment.dateReceived - shipment.expectedDeliveryDate) / (1000 * 3600 * 24);
-        if (deliveryTime >= -20 && deliveryTime <= 3) { // Assuming -20 to +3 days as tolerance
+        const deliveryTime = (new Date(shipment.dateReceived) - new Date(shipment.expectedDeliveryDate)) / (1000 * 3600 * 24);
+        if (deliveryTime >= -20 && deliveryTime <= 3) {
             onTimeDeliveries++;
         }
     });
 
-    return onTimeDeliveries / shipments.length * 100;
+    return onTimeDeliveries / (shipments.length || 1) * 100; // Avoid division by zero
 };
+
 
 // Task: Update vendor performance scores
 const updateVendorPerformanceScores = async () => {
@@ -43,19 +51,15 @@ const updateVendorPerformanceScores = async () => {
         const vendors = await Vendor.find();
 
         for (const vendor of vendors) {
-            const qualityScore = await calculateQualityScore(vendor._id);
-            const deliveryScore = await calculateDeliveryScore(vendor._id);
+            const vendorNumericId = Number(vendor.vendorId); // Ensure it's a number
+            const qualityScore = await calculateQualityScore(vendorNumericId);
+            const deliveryScore = await calculateDeliveryScore(vendorNumericId);
             const overallScore = (qualityScore * 0.6) + (deliveryScore * 0.4);
 
             await VendorPerformance.findOneAndUpdate(
-                { vendorId: vendor._id },
-                {
-                    qualityScore,
-                    deliveryScore,
-                    overallScore,
-                    evaluationDate: new Date()
-                },
-                { upsert: true }
+                { vendorId: vendorNumericId },
+                { qualityScore, deliveryScore, overallScore, evaluationDate: new Date() },
+                { upsert: true, new: true }
             );
         }
         console.log('Vendor performance scores updated');
@@ -64,7 +68,7 @@ const updateVendorPerformanceScores = async () => {
     }
 };
 
-// Schedule the task to run every day at midnight (00:00)
+// Schedule the task to run daily at midnight
 cron.schedule('0 0 * * *', () => {
     console.log('Running the vendor performance update task');
     updateVendorPerformanceScores();

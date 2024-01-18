@@ -8,11 +8,18 @@ const inspectionSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    vendorId: {
+        type: Number, // Ensure this is a Number to match your vendor ID strategy
+        required: true
+    },
+    vendorName: {
+        type: String,
+        required: true
+    },
 
     // Reference to the shipment that is being inspected
-    shipmentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Shipment',
+    purchaseOrderNumber: {
+        type: Number,
         required: true
     },
 
@@ -32,14 +39,14 @@ const inspectionSchema = new mongoose.Schema({
 
     // Rejection codes associated with this inspection
     rejectionCodes: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'RejectionCode'
     }],
 
     // At-fault determination for discrepancies (if any)
     atFault: {
         type: String,
-        enum: ['Vendor', 'Internal'],
+        enum: ['Vendor', 'Internal','Customer Return','N/A'],
         default: 'Vendor'
     },
 
