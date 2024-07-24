@@ -1,79 +1,89 @@
 const cron = require('node-cron');
-const VendorPerformance = require('../models/VendorPerformance');
+const mongoose = require('mongoose');
 const Vendor = require('../models/Vendor');
-const Shipment = require('../models/Shipment'); // Assuming you have a Shipment model
-const Inspection = require('../models/Inspection'); // Assuming you have an Inspection model
+const VendorPerformance = require('../models/VendorPerformance');
+const Shipment = require('../models/Shipment');
+const Inspection = require('../models/Inspection');
+const logger = require('./logger');
 
-/**
- * Function to calculate quality score based on inspection data.
- */
-const calculateQualityScore = async (vendorId) => {
-    const inspections = await Inspection.find({ 'shipmentId.vendorId': vendorId });
-    let totalInspected = 0;
-    let totalAccepted = 0;
-
-    inspections.forEach(inspect => {
-        totalInspected += inspect.quantityReceived;
-        totalAccepted += inspect.quantityAccepted;
-    });
-
-    return totalAccepted / totalInspected * 100;
-};
-
-/**
- * Function to calculate delivery score based on shipment data.
- */
-const calculateDeliveryScore = async (vendorId) => {
-    // Convert vendorId to a number if it's not already
-    const numericVendorId = Number(vendorId);
-    if (isNaN(numericVendorId)) {
-        console.error(`Invalid vendorId (not a number): ${vendorId}`);
-        return 0; // Or handle this case as you see fit
-    }
-    
-    const shipments = await Shipment.find({ vendorId: numericVendorId });
-    let onTimeDeliveries = 0;
-
-    shipments.forEach(shipment => {
-        const deliveryTime = (new Date(shipment.dateReceived) - new Date(shipment.expectedDeliveryDate)) / (1000 * 3600 * 24);
-        if (deliveryTime >= -20 && deliveryTime <= 3) {
-            onTimeDeliveries++;
-        }
-    });
-
-    return onTimeDeliveries / (shipments.length || 1) * 100; // Avoid division by zero
-};
-
-
-// Task: Update vendor performance scores
-const updateVendorPerformanceScores = async () => {
-    try {
-        const vendors = await Vendor.find();
-
-        for (const vendor of vendors) {
-            const vendorNumericId = Number(vendor.vendorId); // Ensure it's a number
-            const qualityScore = await calculateQualityScore(vendorNumericId);
-            const deliveryScore = await calculateDeliveryScore(vendorNumericId);
-            const overallScore = (qualityScore * 0.6) + (deliveryScore * 0.4);
-
-            await VendorPerformance.findOneAndUpdate(
-                { vendorId: vendorNumericId },
-                { qualityScore, deliveryScore, overallScore, evaluationDate: new Date() },
-                { upsert: true, new: true }
-            );
-        }
-        console.log('Vendor performance scores updated');
-    } catch (error) {
-        console.error('Error updating vendor performance scores:', error);
-    }
-};
-
-// Schedule the task to run daily at midnight
-cron.schedule('0 0 * * *', () => {
-    console.log('Running the vendor performance update task');
-    updateVendorPerformanceScores();
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    logger.info('MongoDB successfully connected.');
+}).catch(err => {
+    logger.error('Error connecting to MongoDB:', err);
 });
 
+// Update vendor performance scores
+async function updateVendorPerformanceScores() {
+    const vendors = await Vendor.find({});
+    logger.info('Initiating update of vendor performance scores.');
+
+    for (const vendor of vendors) {
+        const qualityScore = await calculateQualityScore(vendor._id);
+        const deliveryScore = await calculateDeliveryScore(vendor._id);
+        const overallScore = (qualityScore * 0.6) + (deliveryScore * 0.4);
+
+        // Find or create the VendorPerformance document
+        let vendorPerformance = await VendorPerformance.findOne({ vendorId: vendor._id });
+        if (!vendorPerformance) {
+            vendorPerformance = new VendorPerformance({ vendorId: vendor._id });
+        }
+
+        vendorPerformance.qualityRating = qualityScore;
+        vendorPerformance.deliveryRating = deliveryScore;
+        vendorPerformance.overallRating = overallScore;
+        vendorPerformance.qualityPerformance = categorizePerformance(qualityScore);
+        vendorPerformance.deliveryPerformance = categorizePerformance(deliveryScore);
+        vendorPerformance.overallPerformance = categorizePerformance(overallScore);
+        
+        await vendorPerformance.save();
+        logger.info(`Performance updated for ${vendor.vendorName}: Quality ${qualityScore}%, Delivery ${deliveryScore}%, Overall ${overallScore}%`);
+    }
+    logger.info('All vendor performance scores have been successfully updated.');
+}
+
+
+async function calculateQualityScore(vendorId) {
+    const inspections = await Inspection.find({ vendor: vendorId });
+    if (inspections.length === 0) return 100;
+    
+    let totalAccepted = inspections.reduce((acc, cur) => acc + cur.quantityAccepted, 0);
+    let totalInspected = inspections.reduce((acc, cur) => acc + cur.quantityReceived, 0);
+    
+    return (totalAccepted / totalInspected) * 100;
+}
+
+async function calculateDeliveryScore(vendorId) {
+    const shipments = await Shipment.find({ vendor: vendorId });
+    if (shipments.length === 0) return 100;
+    
+    let onTimeDeliveries = shipments.filter(shipment => {
+        const receivedDate = new Date(shipment.dateReceived);
+        const expectedDate = new Date(shipment.expectedDeliveryDate);
+        return receivedDate <= expectedDate;
+    }).length;
+    
+    return (onTimeDeliveries / shipments.length) * 100;
+}
+
+function categorizePerformance(score) {
+    if (score >= 98) return 'Excellent';
+    if (score >= 95) return 'Satisfactory';
+    return 'Unacceptable';
+}
+
+const schedulePerformanceUpdate = () => {
+    cron.schedule('0 0 * * *', async () => {
+        logger.info('Scheduled task started: Updating vendor performance scores.');
+        await updateVendorPerformanceScores();
+    });
+};
+
+schedulePerformanceUpdate();
+
 module.exports = {
-    updateVendorPerformanceScores
+    updateVendorPerformanceScores,
+    schedulePerformanceUpdate
 };

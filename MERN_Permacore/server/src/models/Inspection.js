@@ -1,74 +1,62 @@
 const mongoose = require('mongoose');
+const logger = require("../utils/logger");
+const VendorPerformance = require('../models/VendorPerformance');
+const Shipment = require('../models/Shipment');
 
-// Define the schema for an inspection
+const rejectionCodeSubdocument = new mongoose.Schema({
+  codeId: { type: String, ref: "RejectionCode" },
+  description: String,
+}, { _id: false });
+
 const inspectionSchema = new mongoose.Schema({
-    // Unique identifier for the inspection
-    inspectionId: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    vendorId: {
-        type: Number, // Ensure this is a Number to match your vendor ID strategy
-        required: true
-    },
-    vendorName: {
-        type: String,
-        required: true
-    },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
+    required: true
+  },
+  shipment: { // Use shipment here instead of shipmentId
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Shipment",
+  },
+  inspectorFirstName: { type: String, required: true },
+  inspectorLastName: { type: String, required: true },
+  inspectorBadgeNumber: { type: String, required: true },
+  quantityReceived: { type: Number, required: true },
+  quantityAccepted: { type: Number, required: true },
+  quantityRejected: { type: Number, default: 0 },
+  rejectionCodes: [rejectionCodeSubdocument],
+  atFault: {
+    type: String,
+    enum: ["Vendor", "Internal", "Customer Return", "N/A"],
+    default: "N/A",
+  },
+  notes: String,
+  discrepancyReport: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DiscrepancyReport",
+    default: null,
+  },
+}, { timestamps: true });
 
-    // Reference to the shipment that is being inspected
-    purchaseOrderNumber: {
-        type: Number,
-        required: true
-    },
 
-    // Date when the inspection was conducted
-    inspectionDate: {
-        type: Date,
-        default: Date.now
-    },
-
-    // Name or identifier of the inspector
-    inspectorName: String,
-
-    // Quantities related to the inspection
-    quantityReceived: Number,
-    quantityAccepted: Number,
-    quantityRejected: Number,
-
-    // Rejection codes associated with this inspection
-    rejectionCodes: [{
-        type: String,
-        ref: 'RejectionCode'
-    }],
-
-    // At-fault determination for discrepancies (if any)
-    atFault: {
-        type: String,
-        enum: ['Vendor', 'Internal','Customer Return','N/A'],
-        default: 'Vendor'
-    },
-
-    // Additional notes or findings from the inspection
-    notes: String,
-
-    // Timestamps for when the inspection record was created and last updated
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
-
-// Middleware to automatically update the 'updatedAt' field on save
-inspectionSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
+inspectionSchema.pre("save", function (next) {
+  if (!this.inspectorFirstName || !this.inspectorLastName || !this.inspectorBadgeNumber) {
+    const err = new Error("Inspector details are required.");
+    logger.error("Validation error in inspection schema: Missing inspector details.");
+    next(err);
+  } else {
     next();
+  }
 });
 
-// Export the model
-module.exports = mongoose.model('Inspection', inspectionSchema);
+inspectionSchema.post("save", async function (doc) {
+  const vendorPerformance = await VendorPerformance.findOne({ vendorId: doc.vendor });
+  if (vendorPerformance) {
+    vendorPerformance.quantityAccepted += doc.quantityAccepted;
+    vendorPerformance.quantityRejected += doc.quantityRejected;
+    await vendorPerformance.save();
+  }
+});
+
+module.exports = mongoose.model("Inspection", inspectionSchema);

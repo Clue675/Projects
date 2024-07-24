@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 
 const supplierQualitySchema = new mongoose.Schema({
     vendorName: { type: String, required: true },
-    vendorId: { type: Number, required: true },
+    vendorId: {
+        type: mongoose.Schema.Types.ObjectId, // Use ObjectId for references
+        required: true,
+        ref: 'Vendor' // Reference to Vendor collection
+    },
     performanceScore: { type: Number, required: true },
     status: { type: String, required: true },
     riskCode: { type: String, required: false },

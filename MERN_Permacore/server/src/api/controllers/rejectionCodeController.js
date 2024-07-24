@@ -1,5 +1,6 @@
 const RejectionCode = require('../../models/RejectionCode');
 
+// Function to create multiple rejection codes
 const createMultipleRejectionCodes = async (req, res) => {
     try {
         const newCodes = await RejectionCode.insertMany(req.body);
@@ -9,7 +10,7 @@ const createMultipleRejectionCodes = async (req, res) => {
     }
 };
 
-// Create a new rejection code
+// Function to create a single new rejection code
 const createRejectionCode = async (req, res) => {
     try {
         const newCode = new RejectionCode(req.body);
@@ -20,17 +21,39 @@ const createRejectionCode = async (req, res) => {
     }
 };
 
-// Retrieve all rejection codes
 const getAllRejectionCodes = async (req, res) => {
     try {
         const codes = await RejectionCode.find();
-        res.status(200).json(codes);
+        // Assuming each code document has a 'category' field now
+        const categorizedData = codes.reduce((acc, code) => {
+            // Initialize the category array if it does not exist
+            if (!acc[code.category]) {
+                acc[code.category] = [];
+            }
+            // Push the code to the appropriate category
+            acc[code.category].push({
+                codeId: code.codeId,
+                codeNumber: code.codeNumber,
+                description: code.description,
+            });
+            return acc;
+        }, {});
+
+        // Convert the object to an array of categories with codes
+        const categories = Object.keys(categorizedData).map(category => ({
+            category,
+            codes: categorizedData[category]
+        }));
+
+        res.status(200).json(categories);
     } catch (error) {
+        console.error("Failed to retrieve rejection codes:", error);
         res.status(500).json({ message: error.message });
     }
 };
 
-// Retrieve a single rejection code by ID
+
+// Function to retrieve a single rejection code by ID
 const getRejectionCodeById = async (req, res) => {
     try {
         const code = await RejectionCode.findById(req.params.id);
@@ -43,7 +66,7 @@ const getRejectionCodeById = async (req, res) => {
     }
 };
 
-// Update a rejection code
+// Function to update a rejection code
 const updateRejectionCode = async (req, res) => {
     try {
         const updatedCode = await RejectionCode.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -56,7 +79,7 @@ const updateRejectionCode = async (req, res) => {
     }
 };
 
-// Delete a rejection code
+// Function to delete a rejection code
 const deleteRejectionCode = async (req, res) => {
     try {
         const deletedCode = await RejectionCode.findByIdAndDelete(req.params.id);

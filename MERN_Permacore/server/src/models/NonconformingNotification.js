@@ -1,28 +1,28 @@
 const mongoose = require('mongoose');
 
-// Define the schema for a nonconforming notification
 const nonconformingNotificationSchema = new mongoose.Schema({
-    // Unique identifier for the notification
     notificationId: {
         type: String,
         required: true,
         unique: true
     },
-
-    // Details about the nonconformity
     nonconformityDetails: String,
-
-    // Reference to the discrepancy report related to this notification
+    severityLevel: {
+        type: String,
+        enum: ['Critical', 'Major', 'Minor'],
+        required: true
+    },
     discrepancyReportId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DiscrepancyReport',
         required: true
     },
-
-    // Additional notes or comments
+    followUpActions: [{
+        action: String,
+        dueDate: Date,
+        responsiblePerson: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }],
     notes: String,
-
-    // Timestamps for record creation and modification
     createdAt: {
         type: Date,
         default: Date.now
@@ -33,10 +33,7 @@ const nonconformingNotificationSchema = new mongoose.Schema({
     }
 });
 
-// Middleware for updatedAt field
 nonconformingNotificationSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
 });
-
-module.exports = mongoose.model('NonconformingNotification', nonconformingNotificationSchema);
