@@ -1,11 +1,10 @@
-// src/models/Vendor.js
 const mongoose = require('mongoose');
 const VendorPerformance = require('./VendorPerformance'); // Assuming this is the correct path
 
 const vendorSchema = new mongoose.Schema({
     vendorNumber: { type: Number, required: true, unique: true },
     vendorName: { type: String, required: true },
-    vendorCapabilities: { type: String, required: true, default: "General" },
+    vendorCapabilities: { type: [String], required: true, default: ["General"] },
     approvalType: { type: String, enum: ['Supplier Survey', 'Certification'], required: true },
     performance: { type: mongoose.Schema.Types.ObjectId, ref: 'VendorPerformance' },
     lastAuditDate: Date,

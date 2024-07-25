@@ -11,9 +11,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  IconButton,
   Link,
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
 const ApprovedSupplierList = () => {
   const [vendors, setVendors] = useState([]);
@@ -21,7 +25,8 @@ const ApprovedSupplierList = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCertification, setSelectedCertification] = useState(null);
+  const [selectedVendor, setSelectedVendor] = useState(null);
+  const [certifications, setCertifications] = useState([{ certificateName: '', issuedBy: '', issuedDate: '', expirationDate: '', notes: '', file: null }]);
   const [error, setError] = useState("");
 
   const getCurrentQuarterDates = useCallback(() => {
@@ -43,7 +48,7 @@ const ApprovedSupplierList = () => {
     try {
       const response = await axios.get("/api/vendors");
       console.log("Vendors fetched:", response.data);
-  
+
       if (response.data.length === 0) {
         setError("No vendors found.");
         setVendors([]);
@@ -52,7 +57,7 @@ const ApprovedSupplierList = () => {
         setLoading(false);
         return;
       }
-  
+
       const vendorData = await Promise.all(
         response.data.map(async (vendor) => {
           try {
@@ -70,7 +75,7 @@ const ApprovedSupplierList = () => {
               "Performance Data for Vendor ID " + vendor._id + ":",
               performanceData
             );
-  
+
             if (!performanceData || performanceData.length === 0) {
               return {
                 ...vendor,
@@ -79,7 +84,7 @@ const ApprovedSupplierList = () => {
                 performanceScore: "No data",
               };
             }
-  
+
             const latestPerformance = performanceData[0];
             return {
               ...vendor,
@@ -102,7 +107,7 @@ const ApprovedSupplierList = () => {
           }
         })
       );
-  
+
       setVendors(vendorData);
     } catch (error) {
       console.error("Error fetching vendors:", error);
@@ -113,7 +118,6 @@ const ApprovedSupplierList = () => {
       setLoading(false);
     }
   }, [getCurrentQuarterDates]);
-  
 
   useEffect(() => {
     fetchVendors();
@@ -123,15 +127,57 @@ const ApprovedSupplierList = () => {
   const handleDialogClose = () => setOpenDialog(false);
 
   const handleCertificationClick = async (vendorId) => {
+    setSelectedVendor(vendorId);
+    setOpenDialog(true);
+  };
+
+  const handleAddCertification = () => {
+    setCertifications([...certifications, { certificateName: '', issuedBy: '', issuedDate: '', expirationDate: '', notes: '', file: null }]);
+  };
+
+  const handleRemoveCertification = (index) => {
+    const newCertifications = [...certifications];
+    newCertifications.splice(index, 1);
+    setCertifications(newCertifications);
+  };
+
+  const handleCertificationChange = (index, field, value) => {
+    const newCertifications = [...certifications];
+    newCertifications[index][field] = value;
+    setCertifications(newCertifications);
+  };
+
+  const handleFileChange = (index, file) => {
+    const newCertifications = [...certifications];
+    newCertifications[index].file = file;
+    setCertifications(newCertifications);
+  };
+
+  const handleCertificationSubmit = async () => {
     try {
-      const { data } = await axios.get(
-        `/api/vendors/${vendorId}/certifications`
-      );
-      setSelectedCertification(data);
-      setOpenDialog(true);
+      await Promise.all(certifications.map(async (certification) => {
+        const formData = new FormData();
+        formData.append("certificateName", certification.certificateName);
+        formData.append("issuedBy", certification.issuedBy);
+        formData.append("issuedDate", certification.issuedDate);
+        formData.append("expirationDate", certification.expirationDate);
+        formData.append("notes", certification.notes);
+        formData.append("certificationFile", certification.file);
+
+        await axios.post(`/api/vendors/${selectedVendor}/certifications`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }));
+
+      setSnackbarMessage("Certifications uploaded successfully");
+      setOpenSnackbar(true);
+      setOpenDialog(false);
+      fetchVendors();
     } catch (error) {
-      console.error("Error fetching certification details:", error);
-      setSnackbarMessage("Failed to fetch certification details");
+      console.error("Error uploading certifications:", error);
+      setSnackbarMessage("Failed to upload certifications");
       setOpenSnackbar(true);
     }
   };
@@ -191,7 +237,7 @@ const ApprovedSupplierList = () => {
           onClick={() => handleCertificationClick(params.id)}
           color="primary"
         >
-          View Certifications
+          View/Add Certifications
         </Button>
       ),
     },
@@ -241,47 +287,84 @@ const ApprovedSupplierList = () => {
           Certification Details
         </DialogTitle>
         <DialogContent>
-          {selectedCertification ? (
-            <>
-              <Typography variant="body1">
-                <strong>Certificate Name:</strong>{" "}
-                {selectedCertification.certificateName}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Issued By:</strong> {selectedCertification.issuedBy}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Issued Date:</strong>{" "}
-                {new Date(
-                  selectedCertification.issuedDate
-                ).toLocaleDateString()}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Expiration Date:</strong>{" "}
-                {selectedCertification.expirationDate
-                  ? new Date(
-                      selectedCertification.expirationDate
-                    ).toLocaleDateString()
-                  : "N/A"}
-              </Typography>
-              <Typography variant="body1">
-                <strong>Notes:</strong> {selectedCertification.notes}
-              </Typography>
-              {selectedCertification.fileReference && (
-                <Link
-                  href={`/files/${selectedCertification.fileReference}`}
-                  target="_blank"
-                  download
-                >
-                  Download Certificate
-                </Link>
-              )}
-            </>
-          ) : (
-            <Typography>No Certification Details Available</Typography>
-          )}
+          {certifications.map((certification, index) => (
+            <Grid container spacing={2} key={index}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Certificate Name"
+                  value={certification.certificateName}
+                  onChange={(e) => handleCertificationChange(index, 'certificateName', e.target.value)}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Issued By"
+                  value={certification.issuedBy}
+                  onChange={(e) => handleCertificationChange(index, 'issuedBy', e.target.value)}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Issued Date"
+                  type="date"
+                  value={certification.issuedDate}
+                  onChange={(e) => handleCertificationChange(index, 'issuedDate', e.target.value)}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Expiration Date"
+                  type="date"
+                  value={certification.expirationDate}
+                  onChange={(e) => handleCertificationChange(index, 'expirationDate', e.target.value)}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Notes"
+                  value={certification.notes}
+                  onChange={(e) => handleCertificationChange(index, 'notes', e.target.value)}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(index, e.target.files[0])}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                {index > 0 && (
+                  <IconButton onClick={() => handleRemoveCertification(index)}>
+                    <RemoveCircleOutlineIcon />
+                  </IconButton>
+                )}
+                <IconButton onClick={handleAddCertification}>
+                  <AddCircleOutlineIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          ))}
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleCertificationSubmit} color="primary">
+            Submit
+          </Button>
           <Button onClick={handleDialogClose} color="primary">
             Close
           </Button>

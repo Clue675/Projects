@@ -23,9 +23,9 @@ const ApprovedSupplier = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [vendorName, setVendorName] = useState("");
 
   const [vendorDetails, setVendorDetails] = useState({
+    id: '',
     vendorName: "",
     vendorNumber: "",
     vendorCapabilities: [""],
@@ -69,12 +69,33 @@ const ApprovedSupplier = () => {
       return;
     }
 
+    // Ensure dates are in ISO format
+    const formattedVendorDetails = {
+      ...vendorDetails,
+      lastAuditDate: new Date(vendorDetails.lastAuditDate).toISOString(),
+      nextAuditDate: new Date(vendorDetails.nextAuditDate).toISOString(),
+      issuedDate: new Date(vendorDetails.issuedDate).toISOString(),
+      expirationDate: new Date(vendorDetails.expirationDate).toISOString(),
+    };
+
     try {
-      const response = await axios.post("/api/vendors", vendorDetails);
+      const response = await axios.post("/api/vendors", formattedVendorDetails);
       if (response.status === 201) {
+        const newVendor = response.data.vendor;
         setSnackbarSeverity("success");
-        setSnackbarMessage(`Vendor ${vendorDetails.vendorName} added successfully!`);
+        setSnackbarMessage(`Vendor ${newVendor.vendorName} added successfully!`);
         setOpenSnackbar(true);
+        setVendorDetails((prevDetails) => ({
+          ...prevDetails,
+          id: newVendor._id, // set the newly created vendor ID
+        }));
+
+        // Upload certification file if provided
+        if (vendorDetails.certificationName && vendorDetails.fileName) {
+          await handleFileUpload();
+        }
+
+        // Clear form fields
         setVendorDetails({
           vendorName: "",
           vendorNumber: "",
@@ -124,6 +145,7 @@ const ApprovedSupplier = () => {
       console.log("No files selected.");
       return;
     }
+
     const formData = new FormData();
     formData.append("certificationFile", files[0]);
     formData.append("certificateName", vendorDetails.certificationName);
@@ -201,26 +223,26 @@ const ApprovedSupplier = () => {
               required
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={12}>
+            <Typography variant="body1" gutterBottom>
+              Vendor Capabilities
+            </Typography>
             {vendorDetails.vendorCapabilities.map((capability, index) => (
-              <Grid container spacing={1} key={index}>
+              <Grid container spacing={2} key={index} alignItems="center">
                 <Grid item xs={10}>
                   <TextField
                     fullWidth
-                    label={`Vendor Capability ${index + 1}`}
+                    label={`Capability ${index + 1}`}
                     value={capability}
                     onChange={(e) => handleCapabilityChange(index, e.target.value)}
-                    name={`vendorCapability${index}`}
                     size="small"
                     required
                   />
                 </Grid>
-                <Grid item xs={2} style={{ display: "flex", alignItems: "center" }}>
-                  {vendorDetails.vendorCapabilities.length > 1 && (
-                    <IconButton onClick={() => removeCapability(index)}>
-                      <RemoveCircleOutlineIcon />
-                    </IconButton>
-                  )}
+                <Grid item xs={2}>
+                  <IconButton onClick={() => removeCapability(index)}>
+                    <RemoveCircleOutlineIcon />
+                  </IconButton>
                   {index === vendorDetails.vendorCapabilities.length - 1 && (
                     <IconButton onClick={addCapability}>
                       <AddCircleOutlineIcon />

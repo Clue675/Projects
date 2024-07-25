@@ -1,18 +1,14 @@
-// src/controllers/vendorController.js
 const Vendor = require('../../models/Vendor');
 const Certification = require('../../models/Certification');
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
 
-const savePDFToFileSystem = async (file, vendorId, fileName) => {
-  const uploadPath = path.join(__dirname, '../../uploads', String(vendorId));
-  if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true });
+// Helper function to parse and validate dates
+const parseDate = (dateString) => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date format: ${dateString}`);
   }
-  const filePath = path.join(uploadPath, fileName);
-  await fs.promises.rename(file.path, filePath); // Use rename instead of writeFile to move the file from multer's temp location
-  return filePath;
+  return date;
 };
 
 // Add a new certification
@@ -21,18 +17,25 @@ const addCertification = async (req, res) => {
     const { id } = req.params;
     const { certificateName, issuedBy, issuedDate, expirationDate, notes, fileName } = req.body;
 
+    console.log(`Received issuedDate: ${issuedDate}, expirationDate: ${expirationDate}`);
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Invalid vendor ID format.' });
     }
 
-    const fileReference = await savePDFToFileSystem(req.file, id, fileName || req.file.originalname);
+    const parsedIssuedDate = parseDate(issuedDate);
+    const parsedExpirationDate = parseDate(expirationDate);
+
+    console.log(`Parsed issuedDate: ${parsedIssuedDate}, parsed expirationDate: ${parsedExpirationDate}`);
+
+    const fileReference = req.file ? req.file.originalname : "";
 
     const newCertification = new Certification({
       vendorId: id,
       certificateName,
       issuedBy,
-      issuedDate,
-      expirationDate,
+      issuedDate: parsedIssuedDate,
+      expirationDate: parsedExpirationDate,
       notes,
       fileReference
     });
@@ -48,7 +51,7 @@ const addCertification = async (req, res) => {
   }
 };
 
-// Add a new vendor
+
 const addVendor = async (req, res) => {
   try {
     const {
@@ -68,18 +71,34 @@ const addVendor = async (req, res) => {
       country,
       phone,
       qualityRepName,
-      salesRepName
+      salesRepName,
+      certificationName,
+      certificationText,
+      issuedDate,
+      issuedBy,
+      expirationDate,
+      certificationNotes,
+      fileName
     } = req.body;
+
+    console.log(`Received lastAuditDate: ${lastAuditDate}, nextAuditDate: ${nextAuditDate}, issuedDate: ${issuedDate}, expirationDate: ${expirationDate}`);
 
     if (!vendorName || !vendorNumber || !status || !email || !streetAddress || !city || !state || !zipCode || !country || !phone || !qualityRepName || !salesRepName) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
+    const parsedLastAuditDate = parseDate(lastAuditDate);
+    const parsedNextAuditDate = parseDate(nextAuditDate);
+    const parsedIssuedDate = certificationName && issuedDate ? parseDate(issuedDate) : null;
+    const parsedExpirationDate = certificationName && expirationDate ? parseDate(expirationDate) : null;
+
+    console.log(`Parsed lastAuditDate: ${parsedLastAuditDate}, parsed nextAuditDate: ${parsedNextAuditDate}, parsed issuedDate: ${parsedIssuedDate}, parsed expirationDate: ${parsedExpirationDate}`);
+
     const newVendor = new Vendor({
       vendorName,
       vendorNumber: parseInt(vendorNumber, 10),
-      lastAuditDate,
-      nextAuditDate,
+      lastAuditDate: parsedLastAuditDate,
+      nextAuditDate: parsedNextAuditDate,
       status,
       vendorCapabilities,
       approvalType,
@@ -96,9 +115,20 @@ const addVendor = async (req, res) => {
       certifications: []
     });
 
-    if (req.file) {
-      const fileReference = await savePDFToFileSystem(req.file, newVendor._id);
-      newVendor.certifications.push({ certificateName: req.file.originalname, fileReference });
+    if (certificationName && parsedIssuedDate && parsedExpirationDate) {
+      const newCertification = new Certification({
+        vendorId: newVendor._id,
+        certificateName: certificationName,
+        certificateText: certificationText,
+        issuedDate: parsedIssuedDate,
+        issuedBy: issuedBy,
+        expirationDate: parsedExpirationDate,
+        fileReference: fileName,
+        notes: certificationNotes
+      });
+
+      await newCertification.save();
+      newVendor.certifications.push(newCertification._id);
     }
 
     await newVendor.save();
@@ -109,7 +139,13 @@ const addVendor = async (req, res) => {
   }
 };
 
-// Retrieve all vendors
+
+
+
+
+
+// Other functions (getAllVendors, getVendorById, updateVendor, deleteVendor, getCertificationsByVendor, fetchVendorDetailsWithInspections, updateCertification, deleteCertification) should be defined here in the same way before the module.exports
+
 const getAllVendors = async (req, res) => {
   try {
     const vendors = await Vendor.find().populate('certifications');
@@ -120,7 +156,6 @@ const getAllVendors = async (req, res) => {
   }
 };
 
-// Retrieve a single vendor by ID
 const getVendorById = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -139,7 +174,6 @@ const getVendorById = async (req, res) => {
   }
 };
 
-// Update a vendor's details
 const updateVendor = async (req, res) => {
   const { id } = req.params;
   const { lastAuditDate, nextAuditDate, status, comments } = req.body;
@@ -149,7 +183,12 @@ const updateVendor = async (req, res) => {
   }
 
   try {
-    const updatedVendor = await Vendor.findByIdAndUpdate(id, { lastAuditDate, nextAuditDate, status, comments }, { new: true });
+    const updatedVendor = await Vendor.findByIdAndUpdate(id, {
+      lastAuditDate: new Date(lastAuditDate),
+      nextAuditDate: new Date(nextAuditDate),
+      status,
+      comments
+    }, { new: true });
     if (!updatedVendor) {
       return res.status(404).json({ message: 'Vendor not found.' });
     }
@@ -160,7 +199,6 @@ const updateVendor = async (req, res) => {
   }
 };
 
-// Delete a vendor
 const deleteVendor = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -179,7 +217,6 @@ const deleteVendor = async (req, res) => {
   }
 };
 
-// Retrieve all certifications for a specific vendor
 const getCertificationsByVendor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -198,7 +235,6 @@ const getCertificationsByVendor = async (req, res) => {
   }
 };
 
-// Fetch vendor details with inspections and shipments
 const fetchVendorDetailsWithInspections = async (req, res) => {
   const { vendorId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(vendorId)) {
@@ -224,10 +260,9 @@ const fetchVendorDetailsWithInspections = async (req, res) => {
     res.status(200).json(vendor);
   } catch (error) {
     console.error('Error fetching vendor details:', error);
-    res.status500.json({ message: 'Error fetching vendor details.', error: error.message });
+    res.status(500).json({ message: 'Error fetching vendor details.', error: error.message });
   }
 };
-
 
 const updateCertification = async (req, res) => {
   try {
@@ -238,18 +273,13 @@ const updateCertification = async (req, res) => {
       return res.status(400).json({ message: 'Invalid ID format.' });
     }
 
-    let fileReference;
-    if (req.file) {
-      fileReference = await savePDFToFileSystem(req.file, vendorId, fileName || req.file.originalname);
-    }
-
     const updatedCertification = await Certification.findByIdAndUpdate(certificationId, {
       certificateName,
       issuedBy,
-      issuedDate,
-      expirationDate,
+      issuedDate: new Date(issuedDate),
+      expirationDate: new Date(expirationDate),
       notes,
-      ...(fileReference && { fileReference })
+      fileReference: fileName
     }, { new: true });
 
     if (!updatedCertification) {
@@ -285,10 +315,6 @@ const deleteCertification = async (req, res) => {
     res.status(500).json({ message: 'Error deleting certification.', error: error.message });
   }
 };
-
-
-
-
 
 module.exports = {
   addVendor,
