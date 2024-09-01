@@ -1,40 +1,38 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 
-const certificationSchema = new mongoose.Schema({
-  vendorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vendor',  // Ensures a link to the Vendor model
-    required: true
-  },
-  certificateName: {
-    type: String,
-    required: true
-  },
-  certificateText: String,
-  issuedDate: {
-    type: Date,
-    required: true
-  },
-  issuedBy: String,
-  expirationDate: {
-    type: Date,
-    required: true
-  },
-  fileReference: String,
-  notes: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+// const certificationSchema = new mongoose.Schema({
+//   vendorId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'Vendor',
+//     required: true
+//   },
+//   certificateName: {
+//     type: String,
+//     required: true
+//   },
+//   issuedDate: {
+//     type: Date,
+//     required: true
+//   },
+//   issuedBy: String,
+//   expirationDate: {
+//     type: Date,
+//     required: true
+//   },
+//   notes: String,
+//   createdAt: {
+//     type: Date,
+//     default: Date.now
+//   },
+//   updatedAt: {
+//     type: Date,
+//     default: Date.now
+//   }
+// });
 
-certificationSchema.pre('save', function(next) {
-  this.updatedAt = Date.now(); // Ensure the updated date is set on each save
-  next();
-});
+// certificationSchema.pre('save', function(next) {
+//   this.updatedAt = Date.now();
+//   next();
+// });
 
-module.exports = mongoose.model('Certification', certificationSchema);
+// module.exports = mongoose.model('Certification', certificationSchema);

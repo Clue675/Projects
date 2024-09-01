@@ -1,11 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-
-// Import the vendor controller
 const vendorController = require('../controllers/vendorController');
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 // GET all vendors
 router.get('/', vendorController.getAllVendors);
@@ -23,10 +18,10 @@ router.put('/:id', vendorController.updateVendor);
 router.delete('/:id', vendorController.deleteVendor);
 
 // POST a new certification to a vendor
-router.post('/:id/certifications', upload.single('certificationFile'), vendorController.addCertification);
+router.post('/:id/certifications', vendorController.addCertification);
 
 // PUT to update a certification
-router.put('/:vendorId/certifications/:certificationId', upload.single('certificationFile'), vendorController.updateCertification);
+router.put('/:vendorId/certifications/:certificationId', vendorController.updateCertification);
 
 // DELETE a certification
 router.delete('/:vendorId/certifications/:certificationId', vendorController.deleteCertification);

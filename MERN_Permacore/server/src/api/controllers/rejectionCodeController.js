@@ -10,9 +10,16 @@ const createMultipleRejectionCodes = async (req, res) => {
     }
 };
 
-// Function to create a single new rejection code
 const createRejectionCode = async (req, res) => {
     try {
+        const { codeId, codeNumber, category } = req.body;
+        
+        // Check for duplicates
+        const existingCode = await RejectionCode.findOne({ codeId, codeNumber, category });
+        if (existingCode) {
+            return res.status(400).json({ message: 'Rejection code with this ID and number already exists in the specified category.' });
+        }
+
         const newCode = new RejectionCode(req.body);
         await newCode.save();
         res.status(201).json(newCode);
@@ -21,31 +28,31 @@ const createRejectionCode = async (req, res) => {
     }
 };
 
+const updateRejectionCode = async (req, res) => {
+    try {
+        const { codeId, codeNumber, category } = req.body;
+        
+        // Check for duplicates, excluding the current document
+        const existingCode = await RejectionCode.findOne({ _id: { $ne: req.params.id }, codeId, codeNumber, category });
+        if (existingCode) {
+            return res.status(400).json({ message: 'Rejection code with this ID and number already exists in the specified category.' });
+        }
+
+        const updatedCode = await RejectionCode.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedCode) {
+            return res.status(404).json({ message: 'Rejection code not found' });
+        }
+        res.status(200).json(updatedCode);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+
 const getAllRejectionCodes = async (req, res) => {
     try {
         const codes = await RejectionCode.find();
-        // Assuming each code document has a 'category' field now
-        const categorizedData = codes.reduce((acc, code) => {
-            // Initialize the category array if it does not exist
-            if (!acc[code.category]) {
-                acc[code.category] = [];
-            }
-            // Push the code to the appropriate category
-            acc[code.category].push({
-                codeId: code.codeId,
-                codeNumber: code.codeNumber,
-                description: code.description,
-            });
-            return acc;
-        }, {});
-
-        // Convert the object to an array of categories with codes
-        const categories = Object.keys(categorizedData).map(category => ({
-            category,
-            codes: categorizedData[category]
-        }));
-
-        res.status(200).json(categories);
+        res.status(200).json(codes);
     } catch (error) {
         console.error("Failed to retrieve rejection codes:", error);
         res.status(500).json({ message: error.message });
@@ -66,18 +73,7 @@ const getRejectionCodeById = async (req, res) => {
     }
 };
 
-// Function to update a rejection code
-const updateRejectionCode = async (req, res) => {
-    try {
-        const updatedCode = await RejectionCode.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedCode) {
-            return res.status(404).json({ message: 'Rejection code not found' });
-        }
-        res.status(200).json(updatedCode);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+
 
 // Function to delete a rejection code
 const deleteRejectionCode = async (req, res) => {

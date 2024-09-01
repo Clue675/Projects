@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
-// Import the nonconforming notification controller
 const nonconformingNotificationController = require('../controllers/nonconformingNotificationController');
 
 // GET all nonconforming notifications

@@ -65,5 +65,5 @@ module.exports = {
     getAllNonconformingNotifications,
     getNonconformingNotificationById,
     updateNonconformingNotification,
-    deleteNonconformingNotification
+    deleteNonconformingNotification,
 };

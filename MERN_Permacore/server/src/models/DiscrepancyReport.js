@@ -10,8 +10,6 @@ const reworkOperationSchema = new mongoose.Schema({
   quantityAccept: Number,
   quantityReject: Number,
   quantityScrap: Number,
-  inspectionFirst: Number,
-  inspectionFinal: Number,
 }, { _id: false });
 
 const discrepancyReportSchema = new mongoose.Schema({
@@ -70,8 +68,7 @@ const discrepancyReportSchema = new mongoose.Schema({
     required: true
   },
   notes: String,
-  isDescription: String,
-  shouldBeDescription: String,
+  rejectionDescription: String,
   reworkOperations: [reworkOperationSchema],
   createdAt: {
     type: Date,

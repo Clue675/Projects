@@ -8,6 +8,7 @@ import CostOfRejectionsChart from '../components/SupplierQuality/SupplierQuality
 import SupplierRejectionsTable from '../components/SupplierQuality/SupplierQuality/SupplierRejectionsTable';
 import ControlBox from '../components/SupplierQuality/SupplierQuality/ControlBox';
 import DiscrepancyReports from '../components/SupplierQuality/SupplierQuality/DiscrepancyReports';
+import RejectionCodeControlPanel from '../components/ControlPanels/RejectionCodeControlPanel';
 
 const SupplierDashboard = () => {
   const [timePeriod, setTimePeriod] = useState('month');
@@ -26,6 +27,7 @@ const SupplierDashboard = () => {
         <Tabs value={tabIndex} onChange={handleTabChange}>
           <Tab label="Dashboard" />
           <Tab label="Discrepancy Reports" />
+          <Tab label="Control Panel" />
         </Tabs>
         {tabIndex === 0 && (
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -67,6 +69,15 @@ const SupplierDashboard = () => {
           </Grid>
         )}
         {tabIndex === 1 && <DiscrepancyReports />}
+        {tabIndex === 2 && (
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={12}>
+              <Paper sx={{ p: 2 }}>
+                <RejectionCodeControlPanel />
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
       </Box>
     </Container>
   );

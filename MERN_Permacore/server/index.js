@@ -2,12 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
-const WebSocket = require('ws');
 const mongoose = require('mongoose');
-const path = require('path');
-const multer = require('multer');
-const Grid = require('gridfs-stream');
-const { Readable } = require('stream');
 
 // Database connection function
 const connectDB = require("./src/config/connectDB");
@@ -44,14 +39,6 @@ app.use(cors());
 app.use(express.json());
 app.use(loggerMiddleware);
 
-// Set up GridFS
-let gfs;
-const conn = mongoose.connection;
-conn.once('open', () => {
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('uploads');
-});
-
 // Routes setup
 app.use("/api/vendorPerformance", vendorPerformanceRoutes);
 app.use("/api/correctiveActions", correctiveActionRoutes);
@@ -72,77 +59,8 @@ app.post("/api/logError", (req, res) => {
   res.status(200).json({ message: "Error logged successfully" });
 });
 
-// Multer setup
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-// Upload route
-app.post('/api/vendors/:id/certifications', upload.single('certificationFile'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded.');
-  }
-
-  const readableFileStream = new Readable();
-  readableFileStream.push(req.file.buffer);
-  readableFileStream.push(null);
-
-  const writestream = gfs.createWriteStream({
-    filename: req.file.originalname,
-    contentType: req.file.mimetype,
-  });
-
-  readableFileStream.pipe(writestream);
-
-  writestream.on('close', async (file) => {
-    try {
-      const { id } = req.params;
-      const { certificateName, issuedBy, issuedDate, expirationDate, notes } = req.body;
-
-      const newCertification = new Certification({
-        vendorId: id,
-        certificateName,
-        issuedBy,
-        issuedDate: new Date(issuedDate),
-        expirationDate: new Date(expirationDate),
-        notes,
-        fileReference: file._id,
-      });
-
-      await newCertification.save();
-      await Vendor.findByIdAndUpdate(id, { $push: { certifications: newCertification._id } }, { new: true }).populate('certifications');
-
-      res.status(201).json({ message: 'Certification added successfully', certifications: newCertification });
-    } catch (error) {
-      console.error('Error adding certification:', error);
-      res.status(400).json({ message: 'Error adding certification.', error: error.message });
-    }
-  });
-
-  writestream.on('error', (err) => {
-    console.error(err);
-    res.status(500).send('Error uploading file.');
-  });
-});
-
 // Create a server from the Express app
 const server = http.createServer(app);
-
-// Set up WebSocket server
-const wss = new WebSocket.Server({ noServer: true });
-
-server.on('upgrade', function upgrade(request, socket, head) {
-  wss.handleUpgrade(request, socket, head, function done(ws) {
-    wss.emit('connection', ws, request);
-  });
-});
-
-wss.on("connection", function connection(ws) {
-  ws.on("message", function incoming(message) {
-    console.log("received: %s", message);
-  });
-
-  ws.send("something");
-});
 
 // Error handling middleware
 app.use(errorHandler);

@@ -1,5 +1,4 @@
 const Vendor = require('../../models/Vendor');
-const Certification = require('../../models/Certification');
 const mongoose = require('mongoose');
 
 // Helper function to parse and validate dates
@@ -8,50 +7,45 @@ const parseDate = (dateString) => {
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date format: ${dateString}`);
   }
-  return date;
+  return date.toISOString();
 };
 
-// Add a new certification
+// Add a new certification to a vendor
 const addCertification = async (req, res) => {
   try {
     const { id } = req.params;
-    const { certificateName, issuedBy, issuedDate, expirationDate, notes, fileName } = req.body;
+    const { certificateName, issuedBy, issuedDate, expirationDate, notes, certificateText } = req.body;
 
-    console.log(`Received issuedDate: ${issuedDate}, expirationDate: ${expirationDate}`);
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid vendor ID format.' });
-    }
-
-    const parsedIssuedDate = parseDate(issuedDate);
-    const parsedExpirationDate = parseDate(expirationDate);
-
-    console.log(`Parsed issuedDate: ${parsedIssuedDate}, parsed expirationDate: ${parsedExpirationDate}`);
-
-    const fileReference = req.file ? req.file.originalname : "";
-
-    const newCertification = new Certification({
-      vendorId: id,
+    const newCertification = {
+      _id: new mongoose.Types.ObjectId(),
       certificateName,
       issuedBy,
-      issuedDate: parsedIssuedDate,
-      expirationDate: parsedExpirationDate,
+      issuedDate: parseDate(issuedDate),
+      expirationDate: parseDate(expirationDate),
       notes,
-      fileReference
-    });
+      certificateText,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-    await newCertification.save();
+    const updatedVendor = await Vendor.findByIdAndUpdate(
+      id,
+      { $push: { certifications: newCertification } },
+      { new: true, useFindAndModify: false }
+    ).populate('certifications');
 
-    const updatedVendor = await Vendor.findByIdAndUpdate(id, { $push: { certifications: newCertification._id } }, { new: true }).populate('certifications');
+    if (!updatedVendor) {
+      return res.status(404).json({ message: 'Vendor not found.' });
+    }
 
-    res.status(201).json({ message: 'Certification added successfully', certifications: updatedVendor.certifications });
+    res.status(201).json({ message: 'Certification added successfully', vendor: updatedVendor });
   } catch (error) {
     console.error('Error adding certification:', error);
     res.status(400).json({ message: 'Error adding certification.', error: error.message });
   }
 };
 
-
+// Add a new vendor
 const addVendor = async (req, res) => {
   try {
     const {
@@ -78,27 +72,17 @@ const addVendor = async (req, res) => {
       issuedBy,
       expirationDate,
       certificationNotes,
-      fileName
     } = req.body;
-
-    console.log(`Received lastAuditDate: ${lastAuditDate}, nextAuditDate: ${nextAuditDate}, issuedDate: ${issuedDate}, expirationDate: ${expirationDate}`);
 
     if (!vendorName || !vendorNumber || !status || !email || !streetAddress || !city || !state || !zipCode || !country || !phone || !qualityRepName || !salesRepName) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
-    const parsedLastAuditDate = parseDate(lastAuditDate);
-    const parsedNextAuditDate = parseDate(nextAuditDate);
-    const parsedIssuedDate = certificationName && issuedDate ? parseDate(issuedDate) : null;
-    const parsedExpirationDate = certificationName && expirationDate ? parseDate(expirationDate) : null;
-
-    console.log(`Parsed lastAuditDate: ${parsedLastAuditDate}, parsed nextAuditDate: ${parsedNextAuditDate}, parsed issuedDate: ${parsedIssuedDate}, parsed expirationDate: ${parsedExpirationDate}`);
-
     const newVendor = new Vendor({
       vendorName,
       vendorNumber: parseInt(vendorNumber, 10),
-      lastAuditDate: parsedLastAuditDate,
-      nextAuditDate: parsedNextAuditDate,
+      lastAuditDate: parseDate(lastAuditDate),
+      nextAuditDate: parseDate(nextAuditDate),
       status,
       vendorCapabilities,
       approvalType,
@@ -115,20 +99,20 @@ const addVendor = async (req, res) => {
       certifications: []
     });
 
-    if (certificationName && parsedIssuedDate && parsedExpirationDate) {
-      const newCertification = new Certification({
-        vendorId: newVendor._id,
+    if (certificationName && issuedDate && expirationDate) {
+      const newCertification = {
+        _id: new mongoose.Types.ObjectId(),
         certificateName: certificationName,
         certificateText: certificationText,
-        issuedDate: parsedIssuedDate,
+        issuedDate: parseDate(issuedDate),
         issuedBy: issuedBy,
-        expirationDate: parsedExpirationDate,
-        fileReference: fileName,
-        notes: certificationNotes
-      });
+        expirationDate: parseDate(expirationDate),
+        notes: certificationNotes,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-      await newCertification.save();
-      newVendor.certifications.push(newCertification._id);
+      newVendor.certifications.push(newCertification);
     }
 
     await newVendor.save();
@@ -139,16 +123,11 @@ const addVendor = async (req, res) => {
   }
 };
 
-
-
-
-
-
 // Other functions (getAllVendors, getVendorById, updateVendor, deleteVendor, getCertificationsByVendor, fetchVendorDetailsWithInspections, updateCertification, deleteCertification) should be defined here in the same way before the module.exports
 
 const getAllVendors = async (req, res) => {
   try {
-    const vendors = await Vendor.find().populate('certifications');
+    const vendors = await Vendor.find();
     res.status(200).json(vendors);
   } catch (error) {
     console.error('Error retrieving vendors:', error);
@@ -163,7 +142,7 @@ const getVendorById = async (req, res) => {
   }
 
   try {
-    const vendor = await Vendor.findById(id).populate('certifications');
+    const vendor = await Vendor.findById(id);
     if (!vendor) {
       return res.status(404).json({ message: 'Vendor not found.' });
     }
@@ -184,10 +163,11 @@ const updateVendor = async (req, res) => {
 
   try {
     const updatedVendor = await Vendor.findByIdAndUpdate(id, {
-      lastAuditDate: new Date(lastAuditDate),
-      nextAuditDate: new Date(nextAuditDate),
+      lastAuditDate: parseDate(lastAuditDate),
+      nextAuditDate: parseDate(nextAuditDate),
       status,
-      comments
+      comments,
+      updatedAt: new Date()
     }, { new: true });
     if (!updatedVendor) {
       return res.status(404).json({ message: 'Vendor not found.' });
@@ -224,7 +204,7 @@ const getCertificationsByVendor = async (req, res) => {
       return res.status(400).json({ message: 'Invalid vendor ID format.' });
     }
 
-    const vendor = await Vendor.findById(id).populate('certifications');
+    const vendor = await Vendor.findById(id);
     if (!vendor) {
       return res.status(404).json({ message: 'Vendor not found.' });
     }
@@ -267,26 +247,33 @@ const fetchVendorDetailsWithInspections = async (req, res) => {
 const updateCertification = async (req, res) => {
   try {
     const { vendorId, certificationId } = req.params;
-    const { certificateName, issuedBy, issuedDate, expirationDate, notes, fileName } = req.body;
+    const { certificateName, issuedBy, issuedDate, expirationDate, notes, certificateText } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(vendorId) || !mongoose.Types.ObjectId.isValid(certificationId)) {
       return res.status(400).json({ message: 'Invalid ID format.' });
     }
 
-    const updatedCertification = await Certification.findByIdAndUpdate(certificationId, {
-      certificateName,
-      issuedBy,
-      issuedDate: new Date(issuedDate),
-      expirationDate: new Date(expirationDate),
-      notes,
-      fileReference: fileName
-    }, { new: true });
+    const updatedVendor = await Vendor.findOneAndUpdate(
+      { _id: vendorId, 'certifications._id': certificationId },
+      {
+        $set: {
+          'certifications.$.certificateName': certificateName,
+          'certifications.$.issuedBy': issuedBy,
+          'certifications.$.issuedDate': parseDate(issuedDate),
+          'certifications.$.expirationDate': parseDate(expirationDate),
+          'certifications.$.notes': notes,
+          'certifications.$.certificateText': certificateText,
+          updatedAt: new Date()
+        }
+      },
+      { new: true }
+    );
 
-    if (!updatedCertification) {
+    if (!updatedVendor) {
       return res.status(404).json({ message: 'Certification not found.' });
     }
 
-    res.status(200).json({ message: 'Certification updated successfully', certification: updatedCertification });
+    res.status(200).json({ message: 'Certification updated successfully', vendor: updatedVendor });
   } catch (error) {
     console.error('Error updating certification:', error);
     res.status(400).json({ message: 'Error updating certification.', error: error.message });
@@ -301,15 +288,17 @@ const deleteCertification = async (req, res) => {
       return res.status(400).json({ message: 'Invalid ID format.' });
     }
 
-    const deletedCertification = await Certification.findByIdAndDelete(certificationId);
+    const updatedVendor = await Vendor.findByIdAndUpdate(
+      vendorId,
+      { $pull: { certifications: { _id: certificationId } } },
+      { new: true }
+    );
 
-    if (!deletedCertification) {
+    if (!updatedVendor) {
       return res.status(404).json({ message: 'Certification not found.' });
     }
 
-    await Vendor.findByIdAndUpdate(vendorId, { $pull: { certifications: certificationId } });
-
-    res.status(200).json({ message: 'Certification deleted successfully' });
+    res.status(200).json({ message: 'Certification deleted successfully', vendor: updatedVendor });
   } catch (error) {
     console.error('Error deleting certification:', error);
     res.status(500).json({ message: 'Error deleting certification.', error: error.message });
@@ -320,11 +309,12 @@ module.exports = {
   addVendor,
   getAllVendors,
   getVendorById,
+  addCertification,
   updateVendor,
   deleteVendor,
-  addCertification,
   getCertificationsByVendor,
   fetchVendorDetailsWithInspections,
   deleteCertification,
   updateCertification
 };
+

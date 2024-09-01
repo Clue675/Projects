@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --primary-accent-rgb: 59, 130, 246; /* Tailwind blue-500 */
+  --secondary-accent-rgb: 34, 197, 94; /* Tailwind green-500 */
+  --border-radius: 8px;
+  --shadow-strength: 0, 0, 0, 0.1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 31, 41, 55; /* Tailwind gray-800 */
+    --primary-accent-rgb: 99, 102, 241; /* Tailwind indigo-500 */
+    --secondary-accent-rgb: 52, 211, 153; /* Tailwind green-400 */
+    --shadow-strength: 255, 255, 255, 0.1;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: 'Inter', sans-serif; /* Use Inter or fallback to sans-serif */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+  color: rgb(var(--primary-accent-rgb));
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: rgb(var(--secondary-accent-rgb));
+}
+
+button {
+  background-color: rgb(var(--primary-accent-rgb));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(var(--shadow-strength));
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button:hover {
+  background-color: rgb(var(--secondary-accent-rgb));
+  box-shadow: 0 4px 8px rgba(var(--shadow-strength));
+}
+
+input, textarea {
+  background-color: rgba(var(--background-end-rgb), 0.7);
+  border: 1px solid rgba(var(--foreground-rgb), 0.2);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+
+input:focus, textarea:focus {
+  border-color: rgb(var(--primary-accent-rgb));
+  background-color: rgba(var(--background-end-rgb), 0.9);
+  outline: none;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-gradient-to-b {
+    background: linear-gradient(
+      to bottom,
+      rgba(var(--background-start-rgb), 1),
+      rgba(var(--background-end-rgb), 1)
+    );
+  }
+
+  .card {
+    background-color: rgba(var(--background-end-rgb), 0.8);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(var(--shadow-strength));
+    padding: 1rem;
+    transition: box-shadow 0.3s, transform 0.3s;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 12px rgba(var(--shadow-strength));
+    transform: translateY(-4px);
+  }
+}

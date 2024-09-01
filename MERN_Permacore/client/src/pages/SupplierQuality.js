@@ -48,9 +48,7 @@ const ApprovedSupplier = () => {
     issuedDate: "",
     issuedBy: "",
     expirationDate: "",
-    fileReference: "",
     certificationNotes: "",
-    fileName: "",
   });
 
   const handleApprovalTypeChange = (event) => {
@@ -90,11 +88,6 @@ const ApprovedSupplier = () => {
           id: newVendor._id, // set the newly created vendor ID
         }));
 
-        // Upload certification file if provided
-        if (vendorDetails.certificationName && vendorDetails.fileName) {
-          await handleFileUpload();
-        }
-
         // Clear form fields
         setVendorDetails({
           vendorName: "",
@@ -119,9 +112,7 @@ const ApprovedSupplier = () => {
           issuedDate: "",
           issuedBy: "",
           expirationDate: "",
-          fileReference: "",
           certificationNotes: "",
-          fileName: "",
         });
       } else {
         throw new Error(`Server responded with status: ${response.status}`);
@@ -138,33 +129,6 @@ const ApprovedSupplier = () => {
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
-  };
-
-  const handleFileUpload = async (files) => {
-    if (!files || files.length === 0) {
-      console.log("No files selected.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("certificationFile", files[0]);
-    formData.append("certificateName", vendorDetails.certificationName);
-    formData.append("issuedBy", vendorDetails.issuedBy);
-    formData.append("issuedDate", vendorDetails.issuedDate);
-    formData.append("expirationDate", vendorDetails.expirationDate);
-    formData.append("notes", vendorDetails.certificationNotes);
-    formData.append("fileName", vendorDetails.fileName);
-
-    try {
-      const response = await axios.post(`/api/vendors/${vendorDetails.id}/certifications`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log(`File uploaded: ${response.data.fileReference}`);
-    } catch (error) {
-      console.error("Error uploading file: ", error);
-    }
   };
 
   const handleChange = (e) => {
@@ -489,23 +453,6 @@ const ApprovedSupplier = () => {
               }}
               name="expirationDate"
               size="small"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="File Name"
-              value={vendorDetails.fileName}
-              onChange={handleChange}
-              name="fileName"
-              size="small"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <input
-              type="file"
-              onChange={(e) => handleFileUpload(e.target.files)}
-              name="file"
             />
           </Grid>
           <Grid item xs={12}>
